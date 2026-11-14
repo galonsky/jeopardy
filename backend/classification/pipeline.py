@@ -54,6 +54,17 @@ def _taxonomy_snapshot(version: str) -> TaxonomySnapshot:
     return taxonomy, lookup
 
 
+def build_classification_prompt(clue: SourceClue, taxonomy: list[dict[str, str | list[str]]]) -> str:
+    return (
+        "Classify the knowledge needed to produce the correct Jeopardy response. Use clue and response primarily; "
+        "on-air category and comments are context only. Return one taxonomy subject and subtopic, optional secondary "
+        "subject/subtopic objects, and mechanic tags from: "
+        f"{', '.join(Mechanic.values)}. "
+        f"Taxonomy: {json.dumps(taxonomy)}\nCategory: {clue.original_category}\nComments: {clue.category_comments}"
+        f"\nClue: {clue.clue_text}\nCorrect response: {clue.correct_response}"
+    )
+
+
 def classify_one(
     clue_id: UUID | str,
     version: str,
@@ -65,14 +76,7 @@ def classify_one(
     key = os.environ["OPENAI_API_KEY"]
     base = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1").rstrip("/")
     taxonomy, lookup = taxonomy_snapshot or _taxonomy_snapshot(version)
-    prompt = (
-        "Classify the knowledge needed to produce the correct Jeopardy response. Use clue and response primarily; "
-        "on-air category and comments are context only. Return one taxonomy subject and subtopic, optional secondary "
-        "subject/subtopic objects, and mechanic tags from: "
-        f"{', '.join(Mechanic.values)}. "
-        f"Taxonomy: {json.dumps(taxonomy)}\nCategory: {clue.original_category}\nComments: {clue.category_comments}"
-        f"\nClue: {clue.clue_text}\nCorrect response: {clue.correct_response}"
-    )
+    prompt = build_classification_prompt(clue, taxonomy)
     input_hash = hashlib.sha256(prompt.encode()).hexdigest()
     for attempt in range(3):
         try:
