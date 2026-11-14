@@ -7,15 +7,13 @@ import {
   Check,
   ChevronLeft,
   Clock3,
-  Compass,
-  History,
   Layers3,
   RotateCcw,
-  Settings2,
-  Sparkles,
   Target,
   X,
 } from "lucide-react";
+import { CountdownLights } from "./components/CountdownLights";
+import { RangePlot } from "./components/RangePlot";
 import { api } from "./lib/api-client";
 import { useRealtimeSync } from "./hooks/useRealtimeSync";
 import {
@@ -543,77 +541,44 @@ export default function App() {
   }
 
   const nav = [
-    { id: "dashboard", label: "Overview", icon: Compass },
-    { id: "setup", label: "Practice", icon: Sparkles },
-    { id: "subjects", label: "Subjects", icon: Layers3 },
-    { id: "history", label: "History", icon: History },
-    { id: "settings", label: "Settings", icon: Settings2 },
+    { id: "dashboard", label: "Overview" },
+    { id: "setup", label: "Practice" },
+    { id: "subjects", label: "Subjects" },
+    { id: "history", label: "History" },
+    { id: "settings", label: "Settings" },
   ];
   const current = session?.question;
+  const titles: Record<string, string> = {
+    dashboard: "Overview",
+    setup: "Practice",
+    practice: "Practice",
+    results: "Round complete",
+    subjects: "Subjects",
+    history: "History",
+    settings: "Settings",
+  };
 
   return (
     <div className="app-shell">
-      <aside className="sidebar">
+      <header className="topbar">
         <div className="brand">
-          <div className="brand-mark">J!</div>
-          <div>
-            <strong>Study Hall</strong>
-            <span>JEOPARDY! PREP</span>
-          </div>
+          STUDY<em>HALL</em>
         </div>
-        <div className="side-label">YOUR SPACE</div>
-        <nav>
+        <nav aria-label="Primary">
           {nav.map((item) => (
             <button
               key={item.id}
               className={`nav-item ${screen === item.id ? "active" : ""}`}
+              aria-current={screen === item.id ? "page" : undefined}
               onClick={() => setScreen(item.id)}
             >
-              <item.icon size={18} />
               {item.label}
             </button>
           ))}
         </nav>
-        <div className="side-note">
-          <div className="note-icon">
-            <Sparkles size={17} />
-          </div>
-          <strong>Small steps, sharp recall.</strong>
-          <p>Every clue is a chance to build a stronger instinct.</p>
-        </div>
-        <div className="profile">
-          <div className="avatar">S</div>
-          <div>
-            <strong>Solo study</strong>
-            <span>Local profile</span>
-          </div>
-          <div className="online-dot" />
-        </div>
-      </aside>
+      </header>
       <main className="main-area">
-        <header className="topbar">
-          <div>
-            <span className="eyebrow">YOUR PERSONAL STUDY SPACE</span>
-            <h1>
-              {screen === "dashboard"
-                ? "Good to see you."
-                : screen === "setup"
-                  ? "Choose your next round."
-                  : screen === "practice"
-                    ? "Stay curious."
-                    : screen === "results"
-                      ? "A round well played."
-                      : screen === "subjects"
-                        ? "Your knowledge map."
-                        : screen === "history"
-                          ? "Your study history."
-                          : "Your study settings."}
-            </h1>
-          </div>
-          <div className="today-chip">
-            <span className="online-dot" /> YOUR PROGRESS IS SAVED LOCALLY
-          </div>
-        </header>
+        <h1 className="screen-title">{titles[screen]}</h1>
         {error && (
           <div className="error-banner">
             <X size={16} />
@@ -622,238 +587,135 @@ export default function App() {
           </div>
         )}
         {screen === "dashboard" && (
-          <div className="content-grid">
-            <section className="welcome-card">
-              <div className="welcome-copy">
-                <span className="pill">
-                  <Sparkles size={14} /> READY WHEN YOU ARE
-                </span>
-                <h2>
-                  A little practice
-                  <br />
-                  goes a long way.
-                </h2>
-                <p>Build your breadth, find your blind spots, and get one clue better at a time.</p>
-                <button className="button-light" onClick={() => setScreen("setup")}>
-                  Start a practice round <ArrowRight size={17} />
-                </button>
-              </div>
-              <div className="welcome-art">
-                <div className="orbit orbit-one" />
-                <div className="orbit orbit-two" />
-                <div className="art-book">
-                  <BookOpen size={52} />
-                </div>
-                <div className="spark spark-a">✳</div>
-                <div className="spark spark-b">✦</div>
-                <div className="art-tag">
-                  LEARN A LITTLE
-                  <br />
-                  EVERY DAY
-                </div>
-              </div>
-            </section>
-            <section className="stat-row">
-              <Stat
-                label="Clues answered"
-                value={dashboard.data?.total_attempts ?? 0}
-                hint="All practice rounds"
-                icon={BookOpen}
-              />
-              <Stat
-                label="New clues"
-                value={dashboard.data?.new_attempts ?? 0}
-                hint="First-time attempts"
-                icon={Sparkles}
-              />
-              <Stat
-                label="First-try accuracy"
-                value={
-                  dashboard.data?.novel_graded_attempts
-                    ? `${Math.round((dashboard.data.novel_accuracy ?? 0) * 100)}%`
-                    : "—"
-                }
-                hint="New clues only"
-                icon={Target}
-              />
-              <Stat
-                label="Avg. response time"
-                value={
-                  dashboard.data?.average_response_ms == null
-                    ? "—"
-                    : `${(dashboard.data.average_response_ms / 1000).toFixed(1)}s`
-                }
-                hint="Across answered clues"
-                icon={Clock3}
-              />
-            </section>
-            <section className="panel subject-panel">
-              <div className="panel-heading">
-                <div>
-                  <span className="eyebrow">KNOWLEDGE, IN PROGRESS</span>
-                  <h3>Subject snapshot</h3>
-                </div>
-                <button className="text-button" onClick={() => setScreen("subjects")}>
-                  Explore subjects <ArrowRight size={15} />
-                </button>
-              </div>
-              {dashboard.data?.subjects?.filter((x) => x.attempts > 0).length ? (
-                <div className="subject-list">
-                  {dashboard.data.subjects
-                    .filter((x) => x.attempts > 0)
-                    .slice(0, 6)
-                    .map((x) => (
-                      <div className="subject-line" key={x.id}>
-                        <span>{x.name}</span>
-                        <div className="progress-track">
-                          <div
-                            className="progress-fill"
-                            style={{ width: `${Math.round(x.proficiency * 100)}%` }}
-                          />
-                        </div>
-                        <strong>{Math.round(x.proficiency * 100)}%</strong>
-                        <small
-                          title={`Approx. range ${Math.round(x.lower_bound * 100)}–${Math.round(x.upper_bound * 100)}%`}
-                        >
-                          n={x.attempts}
-                        </small>
-                      </div>
-                    ))}
-                </div>
-              ) : (
-                <Empty text="Subject classification is optional. Your answers are tracked now; classify clues later whenever you're ready." />
-              )}
-            </section>
-            <section className="panel next-panel">
-              <div className="panel-heading">
-                <div>
-                  <span className="eyebrow">A GOOD PLACE TO START</span>
-                  <h3>Pick a practice mode</h3>
-                </div>
-              </div>
-              {modes.map((item) => (
-                <button
-                  className="mode-row"
-                  key={item.id}
-                  onClick={() => {
-                    setMode(item.id);
-                    setScreen("setup");
-                  }}
-                >
-                  <span className="mode-icon">
-                    <item.icon size={19} />
-                  </span>
-                  <span>
-                    <strong>{item.title}</strong>
-                    <small>{item.sub}</small>
-                  </span>
-                  <ArrowRight size={16} />
-                </button>
-              ))}
-            </section>
-            <section className="panel dashboard-insights">
-              <div className="panel-heading">
-                <div>
-                  <span className="eyebrow">FIRST-ATTEMPT PERFORMANCE</span>
-                  <h3>How your study is going</h3>
-                </div>
-                <span className="confidence-range">
-                  {dashboard.data?.novel_graded_attempts
-                    ? `${Math.round(dashboard.data.lower_bound * 100)}–${Math.round(dashboard.data.upper_bound * 100)}% estimated range`
-                    : "Prior only until clues are scored"}
-                </span>
-              </div>
-              <div className="insight-grid">
-                <div className="insight-stat">
-                  <span>Bayesian estimate</span>
-                  <strong>{Math.round((dashboard.data?.proficiency ?? 0.5) * 100)}%</strong>
-                  <small>Novel clues only · excludes uncertain grades</small>
-                </div>
-                <div className="insight-stat">
-                  <span>Review accuracy</span>
-                  <strong>
-                    {dashboard.data?.review_attempts
-                      ? `${Math.round(dashboard.data.review_accuracy * 100)}%`
-                      : "—"}
-                  </strong>
-                  <small>{dashboard.data?.review_attempts ?? 0} scored review attempts</small>
-                </div>
-                <div className="insight-stat">
-                  <span>Last 50 new clues</span>
-                  <strong>
-                    {dashboard.data?.recent_trend.recent_accuracy == null
-                      ? "—"
-                      : `${Math.round(dashboard.data.recent_trend.recent_accuracy * 100)}%`}
-                  </strong>
+          <div className="overview">
+            <section className="overview-head">
+              <div>
+                <span className="eyebrow">First-try proficiency · est.</span>
+                <div className="big-number">
+                  {Math.round((dashboard.data?.proficiency ?? 0.5) * 100)}%
                   <small>
-                    {dashboard.data?.recent_trend.delta == null
-                      ? "Build more history to see a trend"
-                      : `${dashboard.data.recent_trend.delta > 0 ? "+" : ""}${Math.round(dashboard.data.recent_trend.delta * 100)} pts vs. prior clues`}
+                    {dashboard.data?.novel_graded_attempts
+                      ? `range ${Math.round(dashboard.data.lower_bound * 100)}–${Math.round(dashboard.data.upper_bound * 100)}`
+                      : "prior only until clues are scored"}
                   </small>
                 </div>
               </div>
-              <div className="insight-columns">
+              <dl className="kpis">
                 <div>
-                  <span className="eyebrow">SUGGESTED NEXT STEPS</span>
-                  {dashboard.data?.recommendations.length ? (
-                    <ul className="recommendation-list">
-                      {dashboard.data.recommendations.map((item) => (
-                        <li key={item}>{item}</li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="insight-empty">
-                      Recommendations appear when there is enough scored history. Classify clues
-                      when you want subject-specific guidance.
-                    </p>
-                  )}
+                  <dt>Clues</dt>
+                  <dd>{(dashboard.data?.total_attempts ?? 0).toLocaleString()}</dd>
                 </div>
                 <div>
-                  <span className="eyebrow">BY BOARD ROW</span>
-                  <div className="difficulty-summary">
-                    {dashboard.data?.difficulty_levels.map((level) => (
-                      <div key={level.level}>
-                        <span>Row {level.level}</span>
-                        <div className="progress-track">
-                          <div
-                            className="progress-fill"
-                            style={{ width: `${level.attempts ? level.proficiency * 100 : 0}%` }}
-                          />
-                        </div>
-                        <small>
-                          {level.attempts
-                            ? `${Math.round(level.proficiency * 100)}% · n=${level.attempts}`
-                            : "—"}
-                        </small>
-                      </div>
-                    ))}
-                  </div>
+                  <dt>Last 50 new</dt>
+                  <dd
+                    className={
+                      (dashboard.data?.recent_trend.delta ?? 0) < 0
+                        ? "down"
+                        : dashboard.data?.recent_trend.delta
+                          ? "up"
+                          : ""
+                    }
+                  >
+                    {dashboard.data?.recent_trend.delta == null
+                      ? "—"
+                      : `${dashboard.data.recent_trend.delta > 0 ? "+" : ""}${Math.round(dashboard.data.recent_trend.delta * 100)} pts`}
+                  </dd>
                 </div>
-              </div>
-              {dashboard.data?.mode_performance.length ? (
-                <div className="mode-summary">
-                  {dashboard.data.mode_performance.map((item) => (
-                    <span key={item.mode}>
-                      {item.mode.replace("_", " ")}: {Math.round(item.proficiency * 100)}% · n=
-                      {item.attempts}
+                <div>
+                  <dt>Avg response</dt>
+                  <dd>
+                    {dashboard.data?.average_response_ms == null
+                      ? "—"
+                      : `${(dashboard.data.average_response_ms / 1000).toFixed(1)}s`}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Review accuracy</dt>
+                  <dd>
+                    {dashboard.data?.review_attempts
+                      ? `${Math.round(dashboard.data.review_accuracy * 100)}%`
+                      : "—"}
+                  </dd>
+                </div>
+              </dl>
+            </section>
+            <div className="overview-cols">
+              <section>
+                <h2 className="section-title">
+                  Subjects, weakest first
+                  <span>dot = estimate · line = likely range</span>
+                </h2>
+                {dashboard.data?.subjects?.some((x) => x.attempts > 0) ? (
+                  <RangePlot rows={dashboard.data.subjects} overall={dashboard.data.proficiency} />
+                ) : (
+                  <Empty text="Subject classification is optional. Your answers are tracked now; classify clues later whenever you're ready." />
+                )}
+                <h2 className="section-title">By clue value</h2>
+                <div className="value-strip">
+                  {dashboard.data?.difficulty_levels.map((level) => (
+                    <span
+                      key={level.level}
+                      className={level.attempts && level.proficiency < 0.45 ? "weak" : ""}
+                    >
+                      <b>{level.attempts ? `${Math.round(level.proficiency * 100)}%` : "—"}</b>$
+                      {level.level * 200}
                     </span>
                   ))}
                 </div>
-              ) : null}
-            </section>
+              </section>
+              <section>
+                <h2 className="section-title">Up next</h2>
+                {dashboard.data?.recommendations.length ? (
+                  <ul className="next-list">
+                    {dashboard.data.recommendations.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="insight-empty">
+                    Recommendations appear when there is enough scored history.
+                  </p>
+                )}
+                <button className="button-primary" onClick={() => setScreen("setup")}>
+                  Play a round <ArrowRight size={16} />
+                </button>
+                <h2 className="section-title">Pick a mode</h2>
+                {modes.map((item) => (
+                  <button
+                    className="mode-row"
+                    key={item.id}
+                    onClick={() => {
+                      setMode(item.id);
+                      setScreen("setup");
+                    }}
+                  >
+                    <item.icon size={17} />
+                    <span>
+                      <strong>{item.title}</strong>
+                      <small>{item.sub}</small>
+                    </span>
+                    <ArrowRight size={15} />
+                  </button>
+                ))}
+                {dashboard.data?.mode_performance.length ? (
+                  <div className="mode-summary">
+                    {dashboard.data.mode_performance.map((item) => (
+                      <span key={item.mode}>
+                        {item.mode.replace("_", " ")}: {Math.round(item.proficiency * 100)}% · n=
+                        {item.attempts}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
+              </section>
+            </div>
           </div>
         )}
         {screen === "setup" && (
           <div className="setup-wrap">
-            <div className="setup-intro">
-              <span className="eyebrow">MAKE IT YOURS</span>
-              <h2>
-                What would you like
-                <br />
-                to work on?
-              </h2>
-              <p>Pick a mode. You can tune the round to fit your time and focus.</p>
-            </div>
+            <p className="setup-intro">
+              Pick a mode, then tune the round to fit your time and focus.
+            </p>
             <div className="mode-grid">
               {modes.map((item) => (
                 <button
@@ -861,16 +723,10 @@ export default function App() {
                   className={`mode-card ${mode === item.id ? "selected" : ""}`}
                   onClick={() => setMode(item.id)}
                 >
-                  <span className="mode-icon">
-                    <item.icon size={20} />
-                  </span>
+                  <item.icon size={20} />
                   <strong>{item.title}</strong>
                   <small>{item.sub}</small>
-                  {mode === item.id && (
-                    <span className="selected-check">
-                      <Check size={15} />
-                    </span>
-                  )}
+                  {mode === item.id && <Check className="selected-check" size={15} />}
                 </button>
               ))}
             </div>
@@ -945,7 +801,7 @@ export default function App() {
                 </label>
               )}
               <div className="setup-info">
-                <span className="eyebrow">A NOTE ABOUT THE DATA</span>
+                <span className="eyebrow">About the data</span>
                 <p>
                   Clue classification is optional. You can import and study source clues without
                   assigning subjects; subject filters and breakdowns fill in as classifications are
@@ -954,7 +810,7 @@ export default function App() {
               </div>
             </div>
             <section className="filter-panel">
-              <span className="eyebrow">TUNE THIS ROUND</span>
+              <span className="eyebrow">Tune this round</span>
               <div className="filter-row">
                 <label>
                   Difficulty from
@@ -1105,9 +961,6 @@ export default function App() {
               {busy ? "Preparing your round…" : "Begin practice"}
               <ArrowRight size={17} />
             </button>
-            <span className="setup-caption">
-              Your questions are selected from your local clue library.
-            </span>
           </div>
         )}
         {screen === "practice" && session && current && (
@@ -1116,17 +969,7 @@ export default function App() {
               <button className="back-link" onClick={() => void endRound()} disabled={busy}>
                 <ChevronLeft size={17} /> End round
               </button>
-              <div className="round-status">
-                <span>
-                  {session.mode === SessionMode.anytime
-                    ? "ANYTIME TEST PREP"
-                    : session.mode.replace("_", " ").toUpperCase()}
-                </span>
-                <strong>
-                  {session.current_index + 1}
-                  <i> / {session.total}</i>
-                </strong>
-              </div>
+              <span className="round-mode">{session.mode.replace("_", " ")}</span>
             </div>
             <div className="question-progress">
               <div style={{ width: `${(session.current_index / session.total) * 100}%` }} />
@@ -1134,15 +977,20 @@ export default function App() {
             <article className="question-card">
               <div className="question-meta">
                 <span className="category-label">{current.category}</span>
-                {current.difficulty && <span className="difficulty">ROW {current.difficulty}</span>}
+                <span className="clue-count">
+                  Clue {session.current_index + 1} / {session.total}
+                </span>
+                {current.difficulty ? (
+                  <b className="clue-value">${current.difficulty * 200}</b>
+                ) : null}
               </div>
-              {current.deadline_at && (
-                <div className={`timer ${seconds <= 5 ? "urgent" : ""}`}>
-                  <Clock3 size={17} />
-                  <strong>00:{String(seconds).padStart(2, "0")}</strong>
-                </div>
-              )}
               <p className="clue-text">{current.clue}</p>
+              {current.deadline_at && (
+                <CountdownLights
+                  seconds={seconds}
+                  total={current.seconds_per_question ?? session.config?.timer_seconds ?? 15}
+                />
+              )}
               {session.mode === SessionMode.anytime ? (
                 <form
                   onSubmit={(e) => {
@@ -1150,14 +998,18 @@ export default function App() {
                     answer();
                   }}
                 >
-                  <input
-                    ref={input}
-                    className="answer-input test-input"
-                    value={entry}
-                    onChange={(e) => setEntry(e.target.value)}
-                    placeholder="Type your response…"
-                    autoComplete="off"
-                  />
+                  <div className="answer-field">
+                    <input
+                      ref={input}
+                      className="answer-input test-input"
+                      value={entry}
+                      onChange={(e) => setEntry(e.target.value)}
+                      placeholder="What is…"
+                      aria-label="Your response"
+                      autoComplete="off"
+                    />
+                    <kbd>ENTER</kbd>
+                  </div>
                   <button className="button-primary" disabled={busy}>
                     {busy ? "Saving…" : "Lock in response"}
                     <ArrowRight size={17} />
@@ -1169,96 +1021,63 @@ export default function App() {
                     {busy ? "Turning the card…" : "Reveal response"}
                     <ArrowRight size={17} />
                   </button>
-                  <p>Try to recall it first. No typing needed.</p>
+                  <p>
+                    Try to recall it first. <kbd>ENTER</kbd> to reveal.
+                  </p>
                 </div>
               ) : (
                 <div className="reveal-box">
-                  <span className="eyebrow">CORRECT RESPONSE</span>
+                  <span className="eyebrow">Correct response</span>
                   <strong>{current.correct_response}</strong>
-                  <p>How well did you recall it?</p>
                   <div className="grade-buttons">
-                    <button
-                      className="grade-correct"
-                      onClick={() => rateRecall(RecallRating.confident)}
-                      disabled={busy}
-                    >
-                      <Check size={17} />
-                      <span>
-                        <strong>Confident</strong>
-                        <small>I knew it before flipping</small>
-                      </span>
-                      <kbd>1</kbd>
+                    <button onClick={() => rateRecall(RecallRating.confident)} disabled={busy}>
+                      <b>1</b>
+                      Knew it
                     </button>
-                    <button
-                      className="grade-partial"
-                      onClick={() => rateRecall(RecallRating.guessed)}
-                      disabled={busy}
-                    >
-                      <Target size={17} />
-                      <span>
-                        <strong>Guessed</strong>
-                        <small>I had a hunch</small>
-                      </span>
-                      <kbd>2</kbd>
+                    <button onClick={() => rateRecall(RecallRating.guessed)} disabled={busy}>
+                      <b>2</b>
+                      Hunch
                     </button>
-                    <button
-                      className="grade-wrong"
-                      onClick={() => rateRecall(RecallRating.did_not_know)}
-                      disabled={busy}
-                    >
-                      <X size={17} />
-                      <span>
-                        <strong>Didn't know</strong>
-                        <small>I couldn't recall it</small>
-                      </span>
-                      <kbd>3</kbd>
+                    <button onClick={() => rateRecall(RecallRating.did_not_know)} disabled={busy}>
+                      <b>3</b>
+                      Didn't know
                     </button>
                   </div>
-                  <small className="rating-hint">
-                    Your rating saves this clue and moves to the next.
-                  </small>
+                  <small className="rating-hint">Your rating saves this clue and moves on.</small>
                 </div>
               )}
               <div className="question-footer">
-                <span>
-                  {reveal ? (
-                    <>
-                      <kbd>1</kbd> confident · <kbd>2</kbd> guessed · <kbd>3</kbd> didn't know
-                    </>
-                  ) : (
-                    <>
-                      <kbd>ENTER</kbd>{" "}
-                      {session.mode === SessionMode.anytime ? "to lock in" : "to reveal"}
-                    </>
-                  )}
-                </span>
-                <span>{current.subject ?? "Knowledge area not yet assigned"}</span>
+                <span>{current.subject ?? "Subject not yet assigned"}</span>
+                {session.mode !== SessionMode.anytime && !reveal && (
+                  <button
+                    className="text-button skip-button"
+                    onClick={() => void next()}
+                    disabled={busy}
+                  >
+                    Skip this clue <ArrowRight size={14} />
+                  </button>
+                )}
               </div>
-              {session.mode !== SessionMode.anytime && !reveal && (
-                <button
-                  className="text-button skip-button"
-                  onClick={() => void next()}
-                  disabled={busy}
-                >
-                  Skip this clue <ArrowRight size={14} />
-                </button>
-              )}
             </article>
           </section>
         )}
         {screen === "results" && result && (
           <section className="results-wrap">
             <div className="score-card">
-              <span className="eyebrow">ROUND COMPLETE</span>
-              <div className="score-number">
-                {result.score}
-                <small> / {result.total}</small>
-              </div>
+              <span className="eyebrow">
+                Round complete · {result.score} of {result.total}
+              </span>
+              <div className="score-number">{formatDollars(roundDollars(result.attempts))}</div>
               <p>
                 {Math.round(result.accuracy * 100)}% credited ·{" "}
                 {result.attempts.filter((x) => x.correctness === AttemptGrade.uncertain).length}{" "}
                 responses flagged for review
               </p>
+              <div className="result-strip" aria-hidden="true">
+                {result.attempts.map((item) => (
+                  <i key={item.position} className={item.correctness} />
+                ))}
+              </div>
               <button
                 className="button-primary"
                 onClick={() => {
@@ -1269,25 +1088,16 @@ export default function App() {
                 Practice again <ArrowRight size={17} />
               </button>
             </div>
-            <div className="panel review-panel">
-              <div className="panel-heading">
-                <div>
-                  <span className="eyebrow">CLUE BY CLUE</span>
-                  <h3>Round review</h3>
-                </div>
-              </div>
+            <div className="review-panel">
+              <h2 className="section-title">Clue by clue</h2>
               {result.attempts.map((item) => (
                 <div className="review-row" key={item.position}>
-                  <span className={`result-mark ${item.correctness}`}>
-                    {item.correctness === AttemptGrade.correct ? (
-                      <Check size={15} />
-                    ) : (
-                      <X size={15} />
-                    )}
-                  </span>
+                  <span className={`result-mark ${item.correctness}`} aria-hidden="true" />
                   <div className="review-copy">
                     <span>
-                      {item.category} · {item.correctness.toUpperCase()}
+                      {item.category}
+                      {item.difficulty ? ` · $${item.difficulty * 200}` : ""} ·{" "}
+                      {item.correctness.toUpperCase()}
                     </span>
                     <p>{item.clue}</p>
                     <small>
@@ -1297,6 +1107,7 @@ export default function App() {
                       · Correct: {item.correct_response}
                     </small>
                   </div>
+                  <b className="review-dollars">{formatDollars(clueDollars(item), true)}</b>
                   {item.correctness !== AttemptGrade.unanswered && (
                     <div className="review-grade">
                       <button
@@ -1325,79 +1136,24 @@ export default function App() {
           </section>
         )}
         {screen === "subjects" && (
-          <section className="panel full-panel">
-            <div className="panel-heading">
-              <div>
-                <span className="eyebrow">PRIMARY SUBJECT ATTRIBUTION</span>
-                <h3>Subjects and proficiency</h3>
-                <p>
-                  Each first attempt counts once, under its clue’s primary subject. Classification
-                  is optional.
-                </p>
-              </div>
-            </div>
-            {dashboard.data?.subjects?.length ? (
-              dashboard.data.subjects.map((x) => (
-                <div className="subject-explorer" key={x.id}>
-                  <div className="subject-line subject-expanded">
-                    <span>{x.name}</span>
-                    <div className="progress-track">
-                      <div
-                        className="progress-fill"
-                        style={{ width: `${Math.round(x.proficiency * 100)}%` }}
-                      />
-                    </div>
-                    <strong>{Math.round(x.proficiency * 100)}%</strong>
-                    <small>{x.attempts} first attempts</small>
-                  </div>
-                  <div className="subject-subtopics">
-                    {x.subtopics
-                      .filter((topic) => topic.attempts > 0)
-                      .map((topic) => (
-                        <details key={topic.id}>
-                          <summary>
-                            <span>{topic.name}</span>
-                            <strong>{Math.round(topic.proficiency * 100)}%</strong>
-                            <small>
-                              n={topic.attempts} · range {Math.round(topic.lower_bound * 100)}–
-                              {Math.round(topic.upper_bound * 100)}%
-                            </small>
-                          </summary>
-                          <div className="topic-difficulty-list">
-                            {topic.by_difficulty
-                              .filter((level) => level.attempts > 0)
-                              .map((level) => (
-                                <div key={level.level}>
-                                  <span>Difficulty {level.level}</span>
-                                  <div className="progress-track">
-                                    <div
-                                      className="progress-fill"
-                                      style={{ width: `${Math.round(level.proficiency * 100)}%` }}
-                                    />
-                                  </div>
-                                  <strong>{Math.round(level.proficiency * 100)}%</strong>
-                                  <small>n={level.attempts}</small>
-                                </div>
-                              ))}
-                          </div>
-                        </details>
-                      ))}
-                  </div>
-                </div>
-              ))
+          <section className="full-panel">
+            <p className="panel-note">
+              Each first attempt counts once, under its clue’s primary subject. Classification is
+              optional. Open a subject to see its subtopics on the same scale.
+            </p>
+            {dashboard.data?.subjects?.some((x) => x.attempts > 0) ? (
+              <RangePlot
+                rows={dashboard.data.subjects}
+                overall={dashboard.data.proficiency}
+                expanded
+              />
             ) : (
               <Empty text="No classified first attempts yet. Study any clues now; load the optional taxonomy and classify clues when you want subject-level insights." />
             )}
           </section>
         )}
         {screen === "history" && (
-          <section className="panel full-panel">
-            <div className="panel-heading">
-              <div>
-                <span className="eyebrow">YOUR RECENT ROUNDS</span>
-                <h3>Study history</h3>
-              </div>
-            </div>
+          <section className="full-panel">
             {history.data?.length ? (
               history.data.map((item) => (
                 <button
@@ -1430,9 +1186,7 @@ export default function App() {
                     }
                   }}
                 >
-                  <span className="history-icon">
-                    <BookOpen size={17} />
-                  </span>
+                  <BookOpen size={17} />
                   <span>
                     <strong>{item.mode.replace("_", " ")}</strong>
                     <small>{new Date(item.started_at).toLocaleString()}</small>
@@ -1450,11 +1204,9 @@ export default function App() {
         )}
         {screen === "settings" && (
           <section className="settings-grid">
-            <div className="panel settings-card">
-              <span className="settings-icon">
-                <Layers3 size={19} />
-              </span>
-              <span className="eyebrow">OPTIONAL KNOWLEDGE MAP</span>
+            <div className="settings-card">
+              <Layers3 size={19} />
+              <span className="eyebrow">Optional knowledge map</span>
               <h3>Subject classification</h3>
               <p>
                 Clues work without classification. Loading a taxonomy and running the classifier
@@ -1483,11 +1235,9 @@ export default function App() {
                 </div>
               ))}
             </div>
-            <div className="panel settings-card">
-              <span className="settings-icon">
-                <BookOpen size={19} />
-              </span>
-              <span className="eyebrow">YOUR CLUE LIBRARY</span>
+            <div className="settings-card">
+              <BookOpen size={19} />
+              <span className="eyebrow">Your clue library</span>
               <h3>Import clues</h3>
               <p>
                 Import a locally available TSV, CSV, or JSON file with the command below. This
@@ -1508,34 +1258,28 @@ export default function App() {
   );
 }
 
-function Stat({
-  label,
-  value,
-  hint,
-  icon: Icon,
-}: {
-  label: string;
-  value: string | number;
-  hint: string;
-  icon: typeof Target;
-}) {
-  return (
-    <div className="stat-card">
-      <span className="stat-icon">
-        <Icon size={17} />
-      </span>
-      <span className="stat-label">{label}</span>
-      <strong>{value}</strong>
-      <small>{hint}</small>
-    </div>
-  );
+const ROW_VALUE = 200;
+
+function clueDollars(item: { correctness: AttemptGradeValue; difficulty: number | null }) {
+  const value = (item.difficulty ?? 0) * ROW_VALUE;
+  if (item.correctness === AttemptGrade.correct) return value;
+  if (item.correctness === AttemptGrade.incorrect) return -value;
+  return 0;
 }
+
+function roundDollars(attempts: Parameters<typeof clueDollars>[0][]) {
+  return attempts.reduce((sum, item) => sum + clueDollars(item), 0);
+}
+
+function formatDollars(amount: number, signed = false) {
+  const text = `$${Math.abs(amount).toLocaleString()}`;
+  if (amount < 0) return `−${text}`;
+  return signed && amount > 0 ? `+${text}` : text;
+}
+
 function Empty({ text }: { text: string }) {
   return (
     <div className="empty-state">
-      <span className="empty-mark">
-        <Sparkles size={17} />
-      </span>
       <p>{text}</p>
     </div>
   );
