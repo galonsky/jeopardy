@@ -1,5 +1,6 @@
 from math import ceil
 
+from clues.models import SourceClue
 from django.core.management.base import BaseCommand, CommandError
 
 from classification.codex_runner import (
@@ -10,7 +11,6 @@ from classification.codex_runner import (
 )
 from classification.enums import TaxonomyVersion
 from classification.pipeline import _taxonomy_snapshot
-from clues.models import SourceClue
 
 
 class Command(BaseCommand):
@@ -98,7 +98,11 @@ class Command(BaseCommand):
             raise CommandError(str(error)) from error
 
         self.stdout.write("")
-        usage = f"{summary.usage_tokens:,}" if summary.usage_known else f">={summary.usage_tokens:,} (some usage unavailable)"
+        usage = (
+            f"{summary.usage_tokens:,}"
+            if summary.usage_known
+            else f">={summary.usage_tokens:,} (some usage unavailable)"
+        )
         self.stdout.write(
             f"Classified {summary.processed:,}; failed {summary.failed:,}; batches {summary.batches:,}; "
             f"reported input+output tokens {usage}."
