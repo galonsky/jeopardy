@@ -25,9 +25,8 @@ jobs:
     docker: [{ image: cimg/node:24.15 }]
     steps:
       - checkout
-      - run: corepack enable && corepack prepare pnpm@11.0.0 --activate
-      - run: cd frontend && pnpm install --frozen-lockfile
-      - run: cd frontend && pnpm check && pnpm lint && pnpm build
+      - run: cd frontend && corepack pnpm install --frozen-lockfile
+      - run: cd frontend && corepack pnpm check && corepack pnpm lint && corepack pnpm build
   helm-lint:
     docker: [{ image: cimg/base:current }]
     steps:
