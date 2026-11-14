@@ -606,6 +606,18 @@ export default function App() {
                   <dd>{(dashboard.data?.total_attempts ?? 0).toLocaleString()}</dd>
                 </div>
                 <div>
+                  <dt>New clues</dt>
+                  <dd>{(dashboard.data?.new_attempts ?? 0).toLocaleString()}</dd>
+                </div>
+                <div>
+                  <dt>First-try accuracy</dt>
+                  <dd>
+                    {dashboard.data?.novel_graded_attempts
+                      ? `${Math.round(dashboard.data.novel_accuracy * 100)}%`
+                      : "—"}
+                  </dd>
+                </div>
+                <div>
                   <dt>Last 50 new</dt>
                   <dd
                     className={
@@ -616,9 +628,15 @@ export default function App() {
                           : ""
                     }
                   >
-                    {dashboard.data?.recent_trend.delta == null
+                    {dashboard.data?.recent_trend.recent_accuracy == null
                       ? "—"
-                      : `${dashboard.data.recent_trend.delta > 0 ? "+" : ""}${Math.round(dashboard.data.recent_trend.delta * 100)} pts`}
+                      : `${Math.round(dashboard.data.recent_trend.recent_accuracy * 100)}%`}
+                    {dashboard.data?.recent_trend.delta != null && (
+                      <small>
+                        {dashboard.data.recent_trend.delta > 0 ? "+" : ""}
+                        {Math.round(dashboard.data.recent_trend.delta * 100)} pts
+                      </small>
+                    )}
                   </dd>
                 </div>
                 <div>

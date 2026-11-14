@@ -6,6 +6,7 @@ export type RangeRow = {
   lower_bound: number;
   upper_bound: number;
   subtopics?: RangeRow[];
+  by_difficulty?: { level: number; attempts: number; proficiency: number }[];
 };
 
 const WEAK_BELOW = 0.45;
@@ -36,6 +37,20 @@ function Row({ row, nested = false }: { row: RangeRow; nested?: boolean }) {
       <span className="range-value">{percent(row.proficiency)}%</span>
       <small className="range-n">n={row.attempts}</small>
     </div>
+  );
+}
+
+function TopicLevels({ levels }: { levels: NonNullable<RangeRow["by_difficulty"]> }) {
+  const shown = levels.filter((level) => level.attempts > 0);
+  if (!shown.length) return null;
+  return (
+    <ul className="range-levels" aria-label="By clue value">
+      {shown.map((level) => (
+        <li key={level.level}>
+          ${level.level * 200} <b>{percent(level.proficiency)}%</b> n={level.attempts}
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -86,7 +101,10 @@ export function RangePlot({
                 <Row row={row} />
               </summary>
               {topics.map((topic) => (
-                <Row key={topic.id} row={topic} nested />
+                <div key={topic.id}>
+                  <Row row={topic} nested />
+                  <TopicLevels levels={topic.by_difficulty ?? []} />
+                </div>
               ))}
             </details>
           ) : (

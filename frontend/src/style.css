@@ -237,6 +237,10 @@ kbd {
   font: 700 22px var(--font-display);
   font-variant-numeric: tabular-nums;
 }
+.kpis dd small {
+  font: 600 12px var(--font-ui);
+  margin-left: 6px;
+}
 .kpis dd.up {
   color: var(--good);
 }
@@ -941,4 +945,19 @@ kbd {
   .category-label {
     font-size: 16px;
   }
+}
+
+.range-levels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 14px;
+  list-style: none;
+  margin: 0 0 6px;
+  padding: 0 0 0 14px;
+  font-size: 12px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.range-levels b {
+  color: #fff;
 }
