@@ -11,13 +11,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from clues.models import SourceClue
 from django.db import transaction
 from pydantic import ValidationError
 
 from classification.enums import Mechanic, PromptVersion, TaxonomyVersion
 from classification.models import Classification
 from classification.pipeline import Classified, TaxonomySnapshot, _taxonomy_snapshot, build_classification_prompt
-from clues.models import SourceClue
 
 DEFAULT_CODEX_MODEL = "gpt-6-luna"
 DEFAULT_REASONING_EFFORT = "low"
@@ -318,10 +318,10 @@ def classify_pending_with_codex(
         pending_query = pending_query.filter(pk__in=clue_ids)
     if not reprocess:
         pending_query = pending_query.exclude(classifications__version=version)
-    pending_query = pending_query.order_by("pk").values_list("pk", flat=True)
+    pending_id_query = pending_query.order_by("pk").values_list("pk", flat=True)
     if limit:
-        pending_query = pending_query[:limit]
-    pending_ids = list(pending_query)
+        pending_id_query = pending_id_query[:limit]
+    pending_ids = list(pending_id_query)
     summary = CodexRunSummary(pending=len(pending_ids))
     if not pending_ids:
         return summary
@@ -397,7 +397,9 @@ def classify_pending_with_codex(
                 failed += len(invalid_ids) + len(missing_ids)
                 failed_ids.extend(invalid_ids)
                 failed_ids.extend(missing_ids)
-                last_error = "Codex returned no valid classifications for this batch; stopping with remaining clues pending."
+                last_error = (
+                    "Codex returned no valid classifications for this batch; stopping with remaining clues pending."
+                )
                 if progress_callback:
                     progress_callback(batches, processed, failed, len(pending_ids), usage_tokens)
                 break
