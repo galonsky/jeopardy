@@ -1,0 +1,722 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Jeopardy Study API",
+    "version": "1.0.0",
+    "description": ""
+  },
+  "paths": {
+    "/api/health": {
+      "get": {
+        "operationId": "health",
+        "summary": "Health",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "System"
+        ]
+      }
+    },
+    "/api/taxonomy": {
+      "get": {
+        "operationId": "getTaxonomy",
+        "summary": "Taxonomy",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Subjects"
+        ]
+      }
+    },
+    "/api/dashboard": {
+      "get": {
+        "operationId": "getDashboard",
+        "summary": "Dashboard",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Analytics"
+        ]
+      }
+    },
+    "/api/history": {
+      "get": {
+        "operationId": "getHistory",
+        "summary": "History",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Sessions"
+        ]
+      }
+    },
+    "/api/presets": {
+      "get": {
+        "operationId": "getPresets",
+        "summary": "Presets",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Settings"
+        ]
+      },
+      "post": {
+        "operationId": "savePracticePreset",
+        "summary": "Save Preset",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Settings"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PracticePresetInput"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/api/classification-jobs": {
+      "post": {
+        "operationId": "startClassificationJob",
+        "summary": "Start Classification Job",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Classification"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClassificationJobInput"
+              }
+            }
+          },
+          "required": true
+        }
+      },
+      "get": {
+        "operationId": "getClassificationJobs",
+        "summary": "Classification Jobs",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Classification"
+        ]
+      }
+    },
+    "/api/sessions": {
+      "post": {
+        "operationId": "startSession",
+        "summary": "Start Session",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Practice"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartSession"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/api/sessions/{session_id}": {
+      "get": {
+        "operationId": "getSession",
+        "summary": "Get Session",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "session_id",
+            "schema": {
+              "title": "Session Id",
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Practice"
+        ]
+      }
+    },
+    "/api/sessions/{session_id}/reveal": {
+      "post": {
+        "operationId": "revealCurrentAnswer",
+        "summary": "Reveal Current Answer",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "session_id",
+            "schema": {
+              "title": "Session Id",
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Practice"
+        ]
+      }
+    },
+    "/api/sessions/{session_id}/rate/{position}": {
+      "post": {
+        "operationId": "rateCurrentRecall",
+        "summary": "Rate Current Recall",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "session_id",
+            "schema": {
+              "title": "Session Id",
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "position",
+            "schema": {
+              "title": "Position",
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Practice"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecallRatingInput"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/api/sessions/{session_id}/answer": {
+      "post": {
+        "operationId": "answerCurrentQuestion",
+        "summary": "Answer Question",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "session_id",
+            "schema": {
+              "title": "Session Id",
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Practice"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnswerInput"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/api/sessions/{session_id}/advance": {
+      "post": {
+        "operationId": "advanceSession",
+        "summary": "Advance Session",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "session_id",
+            "schema": {
+              "title": "Session Id",
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Practice"
+        ]
+      }
+    },
+    "/api/sessions/{session_id}/abandon": {
+      "post": {
+        "operationId": "abandonSession",
+        "summary": "Abandon Session",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "session_id",
+            "schema": {
+              "title": "Session Id",
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Practice"
+        ]
+      }
+    },
+    "/api/sessions/{session_id}/grade/{position}": {
+      "post": {
+        "operationId": "overrideGrade",
+        "summary": "Override Grade",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "session_id",
+            "schema": {
+              "format": "uuid",
+              "title": "Session Id",
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "position",
+            "schema": {
+              "title": "Position",
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Practice"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GradeInput"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/api/sessions/{session_id}/results": {
+      "get": {
+        "operationId": "getSessionResults",
+        "summary": "Results",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "session_id",
+            "schema": {
+              "format": "uuid",
+              "title": "Session Id",
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Sessions"
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "PracticePresetInput": {
+        "properties": {
+          "name": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "mode": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SessionMode"
+              }
+            ],
+            "default": "general"
+          },
+          "config": {
+            "additionalProperties": true,
+            "title": "Config",
+            "type": "object"
+          },
+          "is_default": {
+            "default": false,
+            "title": "Is Default",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "PracticePresetInput",
+        "type": "object"
+      },
+      "SessionMode": {
+        "enum": [
+          "anytime",
+          "general",
+          "weak_areas",
+          "review"
+        ],
+        "title": "SessionMode",
+        "type": "string"
+      },
+      "ClassificationJobInput": {
+        "properties": {
+          "version": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TaxonomyVersion"
+              }
+            ],
+            "default": "v1"
+          },
+          "limit": {
+            "default": 0,
+            "minimum": 0,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "concurrency": {
+            "default": 2,
+            "maximum": 16,
+            "minimum": 1,
+            "title": "Concurrency",
+            "type": "integer"
+          },
+          "clue_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Clue Ids",
+            "type": "array"
+          },
+          "reprocess": {
+            "default": false,
+            "title": "Reprocess",
+            "type": "boolean"
+          }
+        },
+        "title": "ClassificationJobInput",
+        "type": "object"
+      },
+      "TaxonomyVersion": {
+        "enum": [
+          "v1"
+        ],
+        "title": "TaxonomyVersion",
+        "type": "string"
+      },
+      "StartSession": {
+        "properties": {
+          "mode": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SessionMode"
+              }
+            ],
+            "default": "general"
+          },
+          "count": {
+            "default": 20,
+            "maximum": 100,
+            "minimum": 1,
+            "title": "Count",
+            "type": "integer"
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed"
+          },
+          "min_difficulty": {
+            "default": 1,
+            "maximum": 5,
+            "minimum": 1,
+            "title": "Min Difficulty",
+            "type": "integer"
+          },
+          "max_difficulty": {
+            "default": 5,
+            "maximum": 5,
+            "minimum": 1,
+            "title": "Max Difficulty",
+            "type": "integer"
+          },
+          "difficulty_weights": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Difficulty Weights",
+            "type": "object"
+          },
+          "subject_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Subject Ids",
+            "type": "array"
+          },
+          "subtopic_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Subtopic Ids",
+            "type": "array"
+          },
+          "include_double": {
+            "default": true,
+            "title": "Include Double",
+            "type": "boolean"
+          },
+          "include_daily_doubles": {
+            "default": false,
+            "title": "Include Daily Doubles",
+            "type": "boolean"
+          },
+          "include_final": {
+            "default": false,
+            "title": "Include Final",
+            "type": "boolean"
+          },
+          "include_media_required": {
+            "default": false,
+            "title": "Include Media Required",
+            "type": "boolean"
+          },
+          "min_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Min Date"
+          },
+          "max_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Date"
+          },
+          "timer_seconds": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TimerDuration"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "title": "StartSession",
+        "type": "object"
+      },
+      "TimerDuration": {
+        "enum": [
+          15,
+          30,
+          60
+        ],
+        "title": "TimerDuration",
+        "type": "integer"
+      },
+      "RecallRating": {
+        "enum": [
+          "confident",
+          "guessed",
+          "did_not_know"
+        ],
+        "title": "RecallRating",
+        "type": "string"
+      },
+      "RecallRatingInput": {
+        "properties": {
+          "rating": {
+            "$ref": "#/components/schemas/RecallRating"
+          }
+        },
+        "required": [
+          "rating"
+        ],
+        "title": "RecallRatingInput",
+        "type": "object"
+      },
+      "AnswerInput": {
+        "properties": {
+          "answer": {
+            "default": "",
+            "title": "Answer",
+            "type": "string"
+          },
+          "response_ms": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Response Ms"
+          },
+          "position": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Position"
+          }
+        },
+        "title": "AnswerInput",
+        "type": "object"
+      },
+      "AttemptGrade": {
+        "enum": [
+          "correct",
+          "partial",
+          "incorrect",
+          "uncertain",
+          "unanswered"
+        ],
+        "title": "AttemptGrade",
+        "type": "string"
+      },
+      "GradeInput": {
+        "properties": {
+          "correctness": {
+            "$ref": "#/components/schemas/AttemptGrade"
+          }
+        },
+        "required": [
+          "correctness"
+        ],
+        "title": "GradeInput",
+        "type": "object"
+      }
+    }
+  },
+  "servers": []
+}

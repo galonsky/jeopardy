@@ -1,0 +1,25 @@
+services:
+  postgres:
+    image: postgres:17.7
+    environment:
+      POSTGRES_DB: jeopardy
+      POSTGRES_USER: jeopardy
+      POSTGRES_PASSWORD: jeopardy
+    ports: ["5432:5432"]
+    volumes: ["postgres_data:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jeopardy"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  valkey:
+    image: valkey/valkey:8
+    ports: ["6379:6379"]
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+volumes:
+  postgres_data:
+

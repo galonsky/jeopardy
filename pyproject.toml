@@ -1,0 +1,49 @@
+[project]
+name = "jeopardy-study"
+version = "0.1.0"
+description = "Private, local-first Jeopardy! study application"
+requires-python = ">=3.14"
+dependencies = [
+  "Django>=6.0,<6.1",
+  "django-ninja-extra>=0.30",
+  "django-environ>=0.12",
+  "orjson>=3.10",
+  "psycopg[binary,pool]>=3.2",
+  "uvicorn[standard]>=0.34",
+  "httpx>=0.28",
+  "Authlib>=1.4",
+  "channels>=4.2",
+  "channels-redis>=4.2",
+  "granian>=2.2",
+  "redis>=5.2",
+  "taskiq[opentelemetry]>=0.11",
+  "taskiq-redis>=1.0",
+  "python-json-logger>=3.0",
+  "requests>=2.32",
+]
+
+[dependency-groups]
+dev = ["pytest>=8.3", "pytest-django>=4.9", "pytest-xdist>=3.6", "ruff>=0.9", "mypy>=1.14", "django-stubs[compatible-mypy]>=5.1"]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 120
+target-version = "py314"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.test"
+python_files = ["test_*.py"]
+
+[tool.mypy]
+plugins = ["mypy_django_plugin.main"]
+check_untyped_defs = true
+ignore_missing_imports = true
+
+[tool.django-stubs]
+django_settings_module = "config.settings.test"
+

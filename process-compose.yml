@@ -1,0 +1,15 @@
+version: "0.5"
+processes:
+  backend:
+    command: uv run uvicorn config.asgi:application --app-dir backend --reload --port 8000
+    availability: { restart: "on_failure" }
+  frontend:
+    command: corepack pnpm --dir frontend dev
+    availability: { restart: "on_failure" }
+  worker:
+    command: uv run taskiq worker core.taskiq:broker core.tasks --app-dir backend --workers 1
+    availability: { restart: "on_failure" }
+  scheduler:
+    command: uv run taskiq scheduler core.taskiq:scheduler core.tasks --app-dir backend
+    availability: { restart: "on_failure" }
+

@@ -1,0 +1,85 @@
+version: 2.1
+jobs:
+  backend-lint:
+    docker: [{ image: cimg/python:3.14 }]
+    steps:
+      - checkout
+      - run: pip install uv
+      - run: uv sync --frozen
+      - run: uv run ruff check backend
+      - run: PYTHONPATH=backend uv run mypy backend
+  backend-test:
+    docker:
+      - image: cimg/python:3.14
+      - image: cimg/postgres:17.7
+        environment: { POSTGRES_USER: jeopardy, POSTGRES_PASSWORD: jeopardy, POSTGRES_DB: jeopardy }
+      - image: valkey/valkey:8
+    environment: { DATABASE_URL: postgres://jeopardy:jeopardy@localhost:5432/jeopardy }
+    steps:
+      - checkout
+      - run: pip install uv
+      - run: uv sync --frozen
+      - run: uv run python backend/manage.py makemigrations --check --dry-run
+      - run: uv run pytest -n auto backend
+  frontend-checks:
+    docker: [{ image: cimg/node:24.15 }]
+    steps:
+      - checkout
+      - run: corepack enable && corepack prepare pnpm@11.0.0 --activate
+      - run: cd frontend && pnpm install --frozen-lockfile
+      - run: cd frontend && pnpm check && pnpm lint && pnpm build
+  helm-lint:
+    docker: [{ image: cimg/base:current }]
+    steps:
+      - checkout
+      - run: curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+      - run: helm lint helm/jeopardy
+  dockerhub-publish:
+    docker: [{ image: cimg/base:current }]
+    resource_class: medium
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build and publish the commit image
+          command: |
+            set -euo pipefail
+            : "${DOCKERHUB_USER:?Set DOCKERHUB_USER in the dockerhub-publish context}"
+            : "${DOCKERHUB_PASSWORD:?Set DOCKERHUB_PASSWORD to a Docker Hub access token}"
+            : "${DOCKERHUB_REPOSITORY:?Set DOCKERHUB_REPOSITORY to namespace/repository}"
+            : "${CIRCLE_SHA1:?CircleCI commit SHA is required}"
+            : "${CIRCLE_BUILD_NUM:?CircleCI build number is required}"
+            [[ "${CIRCLE_BRANCH:-}" == "main" && -z "${CIRCLE_TAG:-}" ]] || {
+              echo 'Publishing is restricted to branch builds on main.' >&2
+              exit 1
+            }
+            [[ "$CIRCLE_BUILD_NUM" =~ ^[1-9][0-9]*$ && "$CIRCLE_SHA1" =~ ^[0-9a-f]{40}$ ]] || {
+              echo 'Invalid commit SHA or build number.' >&2
+              exit 1
+            }
+            image="${DOCKERHUB_REPOSITORY}:sha-${CIRCLE_SHA1}-${CIRCLE_BUILD_NUM}"
+            printf '%s' "$DOCKERHUB_PASSWORD" | docker login \
+              --username "$DOCKERHUB_USER" --password-stdin
+            trap 'docker logout >/dev/null 2>&1 || true' EXIT
+            docker buildx build --platform linux/amd64 --push \
+              --file backend/Dockerfile \
+              --tag "$image" \
+              --label "org.opencontainers.image.revision=$CIRCLE_SHA1" \
+              .
+            echo "Published $image"
+workflows:
+  build-test:
+    jobs:
+      - backend-lint
+      - backend-test
+      - frontend-checks
+      - helm-lint
+      - dockerhub-publish:
+          requires: [backend-lint, backend-test, frontend-checks, helm-lint]
+          context: dockerhub-publish
+          filters:
+            branches:
+              only: main
+            tags:
+              ignore: /.*/
+
