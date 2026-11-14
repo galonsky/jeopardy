@@ -12,7 +12,7 @@ Run the mobile browser checks with `cd frontend && pnpm exec playwright install 
 
 ## Interface design
 
-The UI borrows the game's look without using its logo. Practice is a board-blue clue screen with uppercase serif clue text, a condensed category label, the clue value in gold (difficulty row × $200) and red countdown lights for timed rounds. Progress views are quiet: a subject range plot (subtopic rows also list proficiency by clue value) (dot = estimate, line = likely range, dashed gold rule = overall estimate) and a clue-value strip. Results show a dollar total computed in the browser for display only; attempts and grading decisions stay the source of truth.
+The UI borrows the game's look without using its logo. Practice is a board-blue clue screen with uppercase serif clue text, a condensed category label, the clue value in gold (difficulty row × $200) and red countdown lights for timed rounds. Progress views are quiet: a subject range plot (dot = estimate, line = likely range, dashed gold rule = overall estimate), with subtopic rows listing proficiency by clue value, and a clue-value strip. Results show a dollar total computed in the browser for display only; attempts and grading decisions stay the source of truth.
 
 Fonts come from the stacks in `frontend/src/style.css` (`--font-clue`, `--font-category`): a locally installed ITC Korinna or Oswald is used when present, otherwise the system serif and condensed sans. No font files are bundled, so the app ships no licensed typeface.
 
