@@ -2,6 +2,20 @@
 
 The chart runs the API, Taskiq worker and scheduler, a migration job, PostgreSQL, and Valkey. PostgreSQL and Valkey use persistent volume claims. KEDA autoscaling is optional and disabled by default; set `keda.enabled: true` when the `keda.sh/v1alpha1` CRD is installed. Without KEDA, the worker runs one replica.
 
+## Database environments
+
+The application in this release connects to PostgreSQL in the Kubernetes namespace. Its connection URL is assembled for the workloads and its password comes from the `jeopardy-secrets` Kubernetes Secret. The local checkout is separate: local Django commands default to SQLite at `backend/db.sqlite3`, unless `DATABASE_URL` in the shell or repository `.env` overrides it. Never assume a local command is using SQLite without checking its configured engine and target, and never print the full connection URL.
+
+Before a database operation, check `kubectl config current-context` and verify the namespace and API deployment. This matters when a local K3s cluster and the Argo-managed cluster both have a `jeopardy` namespace: the active context selects the target. For a read-only target check that does not reveal credentials:
+
+```sh
+kubectl exec -n jeopardy deploy/jeopardy-api -c api -- \
+  python manage.py shell -c \
+  'from django.conf import settings; d = settings.DATABASES["default"]; print(d["ENGINE"], d.get("NAME"), d.get("HOST"))'
+```
+
+Argo CD syncs application manifests and images; it does not transfer database rows between local SQLite and Kubernetes PostgreSQL. For the local Codex classification workflow, `scripts/classify_and_import_local_codex.sh` classifies locally and then imports to this API pod. The importer uses the pod's database connection, so no Kubernetes database URL or password is needed in a local `.env`. See [AGENTS.md](../../AGENTS.md) for the end-to-end workflow and target checks.
+
 ## Native Kubernetes secret
 
 Create the namespace and secret before installing. The database password must use URL-safe characters because the chart builds the app's PostgreSQL connection URL from it. Hexadecimal is a suitable format.
