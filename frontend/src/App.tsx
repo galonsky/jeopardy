@@ -274,8 +274,9 @@ export default function App() {
   ]);
 
   useEffect(() => {
-    if (screen === "practice" && session?.mode === SessionMode.anytime) input.current?.focus();
-  }, [screen, session?.current_index, session?.mode, reveal]);
+    if (screen === "practice" && session?.mode === SessionMode.anytime && !busy)
+      input.current?.focus();
+  }, [screen, session?.current_index, session?.mode, reveal, busy]);
 
   useEffect(() => {
     function handlePracticeKeys(event: KeyboardEvent) {
