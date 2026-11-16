@@ -36,7 +36,7 @@ def _parse_date(value: str) -> date | None:
 
 
 def _normalize_text(value: str) -> str:
-    return value.replace(r"\"", '"')
+    return value.replace(r"\"", '"').replace(r"\'", "'")
 
 
 def _round(value: str) -> str:
