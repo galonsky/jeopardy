@@ -44,8 +44,8 @@ class IngestionDifficultyTests(TestCase):
             "source_url",
         ]
         raw_category = r"\"TITLES\""
-        raw_comments = r"Use the escaped \"quote\""
-        raw_clue = r"Name the song \"Pomp\""
+        raw_comments = r"Use the escaped \"quote\" and it\'s fine"
+        raw_clue = r"Name the song \"Pomp\" that\'s played"
         raw_response = r"\"Pomp And Circumstance\""
 
         with TemporaryDirectory() as directory:
@@ -72,8 +72,8 @@ class IngestionDifficultyTests(TestCase):
         self.assertEqual(created, 1)
         clue = SourceClue.objects.get()
         self.assertEqual(clue.original_category, '"TITLES"')
-        self.assertEqual(clue.category_comments, 'Use the escaped "quote"')
-        self.assertEqual(clue.clue_text, 'Name the song "Pomp"')
+        self.assertEqual(clue.category_comments, 'Use the escaped "quote" and it\'s fine')
+        self.assertEqual(clue.clue_text, 'Name the song "Pomp" that\'s played')
         self.assertEqual(clue.correct_response, '"Pomp And Circumstance"')
         self.assertEqual(clue.source_url, "https://source.example.test/clues/quoted-1")
         self.assertEqual(clue.original_payload["question"], raw_response)
