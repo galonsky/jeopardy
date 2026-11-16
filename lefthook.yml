@@ -1,0 +1,21 @@
+# Cheap lint jobs that CI also runs (.circleci/config.yml). Install with `make hooks`.
+pre-commit:
+  parallel: true
+  commands:
+    ruff:
+      glob: "backend/**/*.py"
+      run: uv run ruff check backend
+    mypy:
+      glob: "backend/**/*.py"
+      run: PYTHONPATH=backend uv run mypy backend
+    frontend-lint:
+      glob: "frontend/src/**/*.{ts,tsx}"
+      root: frontend/
+      run: corepack pnpm lint
+    frontend-typecheck:
+      glob: "frontend/src/**/*.{ts,tsx}"
+      root: frontend/
+      run: corepack pnpm exec tsc --noEmit
+    helm-lint:
+      glob: "helm/**"
+      run: helm lint helm/jeopardy
