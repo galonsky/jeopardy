@@ -1028,7 +1028,12 @@ export default function App() {
                     />
                     <kbd>ENTER</kbd>
                   </div>
-                  <button className="button-primary" disabled={busy}>
+                  <button
+                    className="button-primary"
+                    disabled={busy}
+                    // Keep focus in the input so the mobile keyboard stays open for the next clue.
+                    onMouseDown={(e) => e.preventDefault()}
+                  >
                     {busy ? "Saving…" : "Lock in response"}
                     <ArrowRight size={17} />
                   </button>
