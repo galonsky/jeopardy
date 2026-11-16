@@ -28,6 +28,7 @@ class SingleQuoteMigrationTests(TestCase):
             "rev",
             1,
         )
+        assert expected is not None
         clue = SourceClue.objects.create(
             source_id="old",
             content_fingerprint="stale",
@@ -65,4 +66,4 @@ class SingleQuoteMigrationTests(TestCase):
         attempt_migration.normalize_answer_snapshots_single_quotes(apps, schema_editor)
 
         attempt.refresh_from_db()
-        self.assertEqual(attempt.canonical_snapshot, "What's \\\"up\\\"")
+        self.assertEqual(attempt.canonical_snapshot, 'What\'s \\"up\\"')
