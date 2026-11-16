@@ -30,6 +30,33 @@ test("mobile navigation and reveal-first practice fit the viewport", async ({ pa
   await expectNoHorizontalOverflow(page);
 });
 
+test("anytime practice keeps the response input focused after locking in", async ({ page }) => {
+  await page.goto("/static/");
+  await page.getByRole("button", { name: "Practice", exact: true }).click();
+  await page.getByRole("button", { name: /Anytime test prep/ }).click();
+  await page.getByRole("button", { name: "Begin practice" }).click();
+
+  const input = page.getByLabel("Your response");
+  await expect(page.locator(".clue-count")).toContainText("Clue 1");
+  await expect(input).toBeFocused();
+
+  await input.fill("first answer");
+  await input.press("Enter");
+  await expect(page.locator(".clue-count")).toContainText("Clue 2");
+  await expect(input).toBeFocused();
+
+  // Losing focus even briefly closes the mobile keyboard, so count blurs too.
+  await input.evaluate((el) => {
+    (window as unknown as { blurs: number }).blurs = 0;
+    el.addEventListener("blur", () => (window as unknown as { blurs: number }).blurs++);
+  });
+  await input.fill("second answer");
+  await page.getByRole("button", { name: "Lock in response" }).click();
+  await expect(page.locator(".clue-count")).toContainText("Clue 3");
+  await expect(input).toBeFocused();
+  expect(await page.evaluate(() => (window as unknown as { blurs: number }).blurs)).toBe(0);
+});
+
 test("all primary screens fit a narrow phone viewport", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 740 });
   await page.goto("/static/");

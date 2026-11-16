@@ -274,9 +274,8 @@ export default function App() {
   ]);
 
   useEffect(() => {
-    if (screen === "practice" && session?.mode === SessionMode.anytime && !busy)
-      input.current?.focus();
-  }, [screen, session?.current_index, session?.mode, reveal, busy]);
+    if (screen === "practice" && session?.mode === SessionMode.anytime) input.current?.focus();
+  }, [screen, session?.current_index, session?.mode, reveal]);
 
   useEffect(() => {
     function handlePracticeKeys(event: KeyboardEvent) {
@@ -1029,7 +1028,12 @@ export default function App() {
                     />
                     <kbd>ENTER</kbd>
                   </div>
-                  <button className="button-primary" disabled={busy}>
+                  <button
+                    className="button-primary"
+                    disabled={busy}
+                    // Keep focus in the input so the mobile keyboard stays open for the next clue.
+                    onMouseDown={(e) => e.preventDefault()}
+                  >
                     {busy ? "Saving…" : "Lock in response"}
                     <ArrowRight size={17} />
                   </button>
