@@ -1,0 +1,24 @@
+# Cheap lint jobs that CI also runs (.circleci/config.yml). Install with `make hooks`.
+# doublestar lets `**` match zero directories (e.g. backend/manage.py).
+glob_matcher: doublestar
+
+pre-commit:
+  parallel: true
+  commands:
+    ruff:
+      glob: "{backend/**/*.py,pyproject.toml,uv.lock}"
+      run: uv run ruff check backend
+    mypy:
+      glob: "{backend/**/*.py,pyproject.toml,uv.lock}"
+      run: PYTHONPATH=backend uv run mypy backend
+    frontend-lint:
+      glob: "{frontend/src/**/*.{ts,tsx},frontend/tsconfig.json,frontend/package.json,frontend/pnpm-lock.yaml}"
+      root: frontend/
+      run: corepack pnpm lint
+    frontend-typecheck:
+      glob: "{frontend/src/**/*.{ts,tsx},frontend/tsconfig.json,frontend/package.json,frontend/pnpm-lock.yaml}"
+      root: frontend/
+      run: corepack pnpm exec tsc --noEmit
+    helm-lint:
+      glob: "helm/**"
+      run: helm lint helm/jeopardy

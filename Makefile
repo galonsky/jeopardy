@@ -1,9 +1,12 @@
 PY=uv run python backend/manage.py
 
-.PHONY: install setup services migrate migrations dev dev-backend dev-frontend test lint format generate-api sample export-progress import-progress
+.PHONY: install hooks setup services migrate migrations dev dev-backend dev-frontend test lint format generate-api sample export-progress import-progress
 install:
 	uv sync --frozen --all-groups
 	cd frontend && corepack pnpm install --frozen-lockfile
+
+hooks:
+	lefthook install
 
 setup:
 	$(PY) migrate

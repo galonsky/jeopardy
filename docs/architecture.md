@@ -6,7 +6,7 @@ The repository includes a small synthetic clue fixture for development. It does 
 
 ## Setup and sample
 
-Use Python 3.14 (`.python-version`) and Node 24 (`.nvmrc`). Install with `make install`, then `make setup`, then `make sample`. Local settings default to SQLite; Valkey provides the Redis-backed WebSocket and task services. Start Valkey with `make services`, then run Django and Vite with `make dev` or `make dev-backend` and `make dev-frontend`. Postgres is optional for local study.
+Use Python 3.14 (`.python-version`) and Node 24 (`.nvmrc`). Install with `make install`, then `make setup`, then `make sample`. Local settings default to SQLite; Valkey provides the Redis-backed WebSocket and task services. Start Valkey with `make services`, then run Django and Vite with `make dev` or `make dev-backend` and `make dev-frontend`. Postgres is optional for local study. Run `make hooks` to install Lefthook pre-commit hooks (needs the `lefthook` binary) that run the cheap CI lint jobs (ruff, mypy, oxlint, tsc, helm lint) on relevant staged changes; `git commit --no-verify` bypasses them.
 
 Run the mobile browser checks with `cd frontend && pnpm exec playwright install chromium && pnpm e2e`.
 
