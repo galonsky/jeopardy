@@ -5,11 +5,10 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type RecallRating = typeof RecallRating[keyof typeof RecallRating];
-
+export type RecallRating = (typeof RecallRating)[keyof typeof RecallRating];
 
 export const RecallRating = {
-  confident: 'confident',
-  guessed: 'guessed',
-  did_not_know: 'did_not_know',
+  confident: "confident",
+  guessed: "guessed",
+  did_not_know: "did_not_know",
 } as const;

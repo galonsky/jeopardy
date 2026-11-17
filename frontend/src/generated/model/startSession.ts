@@ -4,27 +4,27 @@
  * Jeopardy Study API
  * OpenAPI spec version: 1.0.0
  */
-import type { SessionMode } from './sessionMode.ts';
-import type { StartSessionDifficultyWeights } from './startSessionDifficultyWeights.ts';
-import type { TimerDuration } from './timerDuration.ts';
+import type { SessionMode } from "./sessionMode.ts";
+import type { StartSessionDifficultyWeights } from "./startSessionDifficultyWeights.ts";
+import type { TimerDuration } from "./timerDuration.ts";
 
 export interface StartSession {
   mode?: SessionMode;
   /**
-     * @minimum 1
-     * @maximum 100
-     */
+   * @minimum 1
+   * @maximum 100
+   */
   count?: number;
   seed?: number | null;
   /**
-     * @minimum 1
-     * @maximum 5
-     */
+   * @minimum 1
+   * @maximum 5
+   */
   min_difficulty?: number;
   /**
-     * @minimum 1
-     * @maximum 5
-     */
+   * @minimum 1
+   * @maximum 5
+   */
   max_difficulty?: number;
   difficulty_weights?: StartSessionDifficultyWeights;
   subject_ids?: number[];

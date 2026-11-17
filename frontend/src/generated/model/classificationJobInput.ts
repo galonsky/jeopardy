@@ -4,16 +4,16 @@
  * Jeopardy Study API
  * OpenAPI spec version: 1.0.0
  */
-import type { TaxonomyVersion } from './taxonomyVersion.ts';
+import type { TaxonomyVersion } from "./taxonomyVersion.ts";
 
 export interface ClassificationJobInput {
   version?: TaxonomyVersion;
   /** @minimum 0 */
   limit?: number;
   /**
-     * @minimum 1
-     * @maximum 16
-     */
+   * @minimum 1
+   * @maximum 16
+   */
   concurrency?: number;
   clue_ids?: string[];
   reprocess?: boolean;

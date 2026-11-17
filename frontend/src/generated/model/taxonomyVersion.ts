@@ -5,9 +5,8 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type TaxonomyVersion = typeof TaxonomyVersion[keyof typeof TaxonomyVersion];
-
+export type TaxonomyVersion = (typeof TaxonomyVersion)[keyof typeof TaxonomyVersion];
 
 export const TaxonomyVersion = {
-  v1: 'v1',
+  v1: "v1",
 } as const;

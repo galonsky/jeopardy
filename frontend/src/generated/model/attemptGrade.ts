@@ -5,13 +5,12 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type AttemptGrade = typeof AttemptGrade[keyof typeof AttemptGrade];
-
+export type AttemptGrade = (typeof AttemptGrade)[keyof typeof AttemptGrade];
 
 export const AttemptGrade = {
-  correct: 'correct',
-  partial: 'partial',
-  incorrect: 'incorrect',
-  uncertain: 'uncertain',
-  unanswered: 'unanswered',
+  correct: "correct",
+  partial: "partial",
+  incorrect: "incorrect",
+  uncertain: "uncertain",
+  unanswered: "unanswered",
 } as const;

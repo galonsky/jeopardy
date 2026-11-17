@@ -33,7 +33,7 @@ test("mobile navigation and reveal-first practice fit the viewport", async ({ pa
 test("anytime practice keeps the response input focused after locking in", async ({ page }) => {
   await page.goto("/static/");
   await page.getByRole("button", { name: "Practice", exact: true }).click();
-  await page.getByRole("button", { name: /Anytime test prep/ }).click();
+  await page.getByRole("radio", { name: /Anytime test prep/ }).click();
   await page.getByRole("button", { name: "Begin practice" }).click();
 
   const input = page.getByLabel("Your response");
