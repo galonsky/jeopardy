@@ -5,12 +5,11 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type SessionMode = typeof SessionMode[keyof typeof SessionMode];
-
+export type SessionMode = (typeof SessionMode)[keyof typeof SessionMode];
 
 export const SessionMode = {
-  anytime: 'anytime',
-  general: 'general',
-  weak_areas: 'weak_areas',
-  review: 'review',
+  anytime: "anytime",
+  general: "general",
+  weak_areas: "weak_areas",
+  review: "review",
 } as const;

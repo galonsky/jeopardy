@@ -4,10 +4,7 @@
  * Jeopardy Study API
  * OpenAPI spec version: 1.0.0
  */
-import {
-  useMutation,
-  useQuery
-} from '@tanstack/react-query';
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type {
   DataTag,
   DefinedInitialDataOptions,
@@ -20,26 +17,21 @@ import type {
   UseMutationOptions,
   UseMutationResult,
   UseQueryOptions,
-  UseQueryResult
-} from '@tanstack/react-query';
+  UseQueryResult,
+} from "@tanstack/react-query";
 
-import type {
-  ClassificationJobInput
-} from '../model';
+import type { ClassificationJobInput } from "../model";
 
-import { customInstance } from '../../lib/api-client.ts';
-
+import { customInstance } from "../../lib/api-client.ts";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
-
-
 
 const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKey: K } => {
   const result = { queryKey } as T & { queryKey: K };
   for (const key of Object.keys(query)) {
     // The explicit queryKey always wins, matching the previous
     // `{ ...query, queryKey }` spread where it was set last.
-    if (key === 'queryKey') continue;
+    if (key === "queryKey") continue;
     Object.defineProperty(result, key, {
       enumerable: true,
       configurable: true,
@@ -50,36 +42,38 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
 };
 
 export type startClassificationJobResponse200 = {
-  data: void
-  status: 200
-}
+  data: void;
+  status: 200;
+};
 
-export type startClassificationJobResponseSuccess = (startClassificationJobResponse200) & {
+export type startClassificationJobResponseSuccess = startClassificationJobResponse200 & {
   headers: Headers;
 };
-;
 
-export type startClassificationJobResponse = (startClassificationJobResponseSuccess)
+export type startClassificationJobResponse = startClassificationJobResponseSuccess;
 
 export const getStartClassificationJobUrl = () => {
-
-
-
-
-  return `/api/classification-jobs`
-}
+  return `/api/classification-jobs`;
+};
 
 /**
  * @summary Start Classification Job
  */
-export const startClassificationJob = async (classificationJobInput: ClassificationJobInput, options?: Parameters<typeof customInstance>[1]): Promise<startClassificationJobResponse> => {
-
-    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+export const startClassificationJob = async (
+  classificationJobInput: ClassificationJobInput,
+  options?: Parameters<typeof customInstance>[1],
+): Promise<startClassificationJobResponse> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit["headers"]>,
+  ): Record<string, string | readonly string[]> => {
     if (!h) return {};
     if (h instanceof Headers) return Object.fromEntries(h.entries());
     if (Symbol.iterator in h) {
       return Object.fromEntries(
-        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+        Array.from(
+          h as Iterable<Iterable<string>>,
+          (entry) => Array.from(entry) as [string, string],
+        ),
       );
     }
     const headers: Record<string, string | readonly string[]> = {};
@@ -88,173 +82,211 @@ export const startClassificationJob = async (classificationJobInput: Classificat
     }
     return headers;
   };
-return customInstance<startClassificationJobResponse>(getStartClassificationJobUrl(),
-  {
+  return customInstance<startClassificationJobResponse>(getStartClassificationJobUrl(), {
     ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
-    body: JSON.stringify(classificationJobInput)
-  }
-);}
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...getHeaders(options?.headers) },
+    body: JSON.stringify(classificationJobInput),
+  });
+};
 
+export const getStartClassificationJobMutationKey = () => ["startClassificationJob"] as const;
 
+export const getStartClassificationJobMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof startClassificationJob>>,
+    TError,
+    StartClassificationJobMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof startClassificationJob>>,
+  TError,
+  StartClassificationJobMutationVariables,
+  TContext
+> => {
+  const mutationKey = getStartClassificationJobMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
 
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof startClassificationJob>>,
+    StartClassificationJobMutationVariables
+  > = (props) => {
+    const { data } = props ?? {};
 
+    return startClassificationJob(data, requestOptions);
+  };
 
-export const getStartClassificationJobMutationKey = () => ['startClassificationJob'] as const;
+  return { mutationFn, ...mutationOptions };
+};
 
-export const getStartClassificationJobMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof startClassificationJob>>, TError,StartClassificationJobMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof startClassificationJob>>, TError,StartClassificationJobMutationVariables, TContext> => {
+export type StartClassificationJobMutationResult = NonNullable<
+  Awaited<ReturnType<typeof startClassificationJob>>
+>;
+export type StartClassificationJobMutationBody = ClassificationJobInput;
+export type StartClassificationJobMutationError = unknown;
+export type StartClassificationJobMutationVariables = { data: ClassificationJobInput };
 
-const mutationKey = getStartClassificationJobMutationKey();
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
+/** @summary Start Classification Job */
+export const useStartClassificationJob = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof startClassificationJob>>,
+      TError,
+      StartClassificationJobMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof startClassificationJob>>,
+  TError,
+  StartClassificationJobMutationVariables,
+  TContext
+> => {
+  return useMutation(getStartClassificationJobMutationOptions(options), queryClient);
+};
+export type getClassificationJobsResponse200 = {
+  data: void;
+  status: 200;
+};
 
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof startClassificationJob>>, StartClassificationJobMutationVariables> = (props) => {
-          const {data} = props ?? {};
-
-          return  startClassificationJob(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type StartClassificationJobMutationResult = NonNullable<Awaited<ReturnType<typeof startClassificationJob>>>
-    export type StartClassificationJobMutationBody = ClassificationJobInput
-    export type StartClassificationJobMutationError = unknown
-    export type StartClassificationJobMutationVariables = {data: ClassificationJobInput}
-
-    /** @summary Start Classification Job */
-export const useStartClassificationJob = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof startClassificationJob>>, TError,StartClassificationJobMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof startClassificationJob>>,
-        TError,
-        StartClassificationJobMutationVariables,
-        TContext
-      > => {
-      return useMutation(getStartClassificationJobMutationOptions(options), queryClient);
-    }
-    export type getClassificationJobsResponse200 = {
-  data: void
-  status: 200
-}
-
-export type getClassificationJobsResponseSuccess = (getClassificationJobsResponse200) & {
+export type getClassificationJobsResponseSuccess = getClassificationJobsResponse200 & {
   headers: Headers;
 };
-;
 
-export type getClassificationJobsResponse = (getClassificationJobsResponseSuccess)
+export type getClassificationJobsResponse = getClassificationJobsResponseSuccess;
 
 export const getGetClassificationJobsUrl = () => {
-
-
-
-
-  return `/api/classification-jobs`
-}
+  return `/api/classification-jobs`;
+};
 
 /**
  * @summary Classification Jobs
  */
-export const getClassificationJobs = async ( options?: Parameters<typeof customInstance>[1]): Promise<getClassificationJobsResponse> => {
-
-  return customInstance<getClassificationJobsResponse>(getGetClassificationJobsUrl(),
-  {
+export const getClassificationJobs = async (
+  options?: Parameters<typeof customInstance>[1],
+): Promise<getClassificationJobsResponse> => {
+  return customInstance<getClassificationJobsResponse>(getGetClassificationJobsUrl(), {
     ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
+    method: "GET",
+  });
+};
 
 export const getGetClassificationJobsQueryKey = () => {
-    return [
-    `/api/classification-jobs`
-    ] as const;
-    }
+  return [`/api/classification-jobs`] as const;
+};
 
+export const getGetClassificationJobsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getClassificationJobs>>,
+  TError = unknown,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<Awaited<ReturnType<typeof getClassificationJobs>>, TError, TData>
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
-export const getGetClassificationJobsQueryOptions = <TData = Awaited<ReturnType<typeof getClassificationJobs>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getClassificationJobs>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
-) => {
+  const queryKey = queryOptions?.queryKey ?? getGetClassificationJobsQueryKey();
 
-const {query: queryOptions, request: requestOptions} = options ?? {};
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getClassificationJobs>>> = ({ signal }) =>
+    getClassificationJobs({ signal, ...requestOptions });
 
-  const queryKey =  queryOptions?.queryKey ?? getGetClassificationJobsQueryKey();
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getClassificationJobs>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
 
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getClassificationJobs>>> = ({ signal }) => getClassificationJobs({ signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getClassificationJobs>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetClassificationJobsQueryResult = NonNullable<Awaited<ReturnType<typeof getClassificationJobs>>>
-export type GetClassificationJobsQueryError = unknown
-
+export type GetClassificationJobsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getClassificationJobs>>
+>;
+export type GetClassificationJobsQueryError = unknown;
 
 /** @summary Classification Jobs */
-export function useGetClassificationJobs<TData = Awaited<ReturnType<typeof getClassificationJobs>>, TError = unknown>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getClassificationJobs>>, TError, TData>> & Pick<
+export function useGetClassificationJobs<
+  TData = Awaited<ReturnType<typeof getClassificationJobs>>,
+  TError = unknown,
+>(
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getClassificationJobs>>, TError, TData>
+    > &
+      Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getClassificationJobs>>,
           TError,
           Awaited<ReturnType<typeof getClassificationJobs>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /** @summary Classification Jobs */
-export function useGetClassificationJobs<TData = Awaited<ReturnType<typeof getClassificationJobs>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getClassificationJobs>>, TError, TData>> & Pick<
+export function useGetClassificationJobs<
+  TData = Awaited<ReturnType<typeof getClassificationJobs>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getClassificationJobs>>, TError, TData>
+    > &
+      Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getClassificationJobs>>,
           TError,
           Awaited<ReturnType<typeof getClassificationJobs>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /** @summary Classification Jobs */
-export function useGetClassificationJobs<TData = Awaited<ReturnType<typeof getClassificationJobs>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getClassificationJobs>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetClassificationJobs<
+  TData = Awaited<ReturnType<typeof getClassificationJobs>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getClassificationJobs>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /** @summary Classification Jobs */
-export function useGetClassificationJobs<TData = Awaited<ReturnType<typeof getClassificationJobs>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getClassificationJobs>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+export function useGetClassificationJobs<
+  TData = Awaited<ReturnType<typeof getClassificationJobs>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getClassificationJobs>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getGetClassificationJobsQueryOptions(options);
 
-  const queryOptions = getGetClassificationJobsQueryOptions(options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
 
   return withQueryKey(query, queryOptions.queryKey);
 }
-
-
-
-
-
-

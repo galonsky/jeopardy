@@ -83,6 +83,8 @@ Run the mobile browser checks with `cd frontend && pnpm exec playwright install 
 
 The UI borrows the game's look without using its logo. Practice is a board-blue clue screen with uppercase serif clue text, a condensed category label, the clue value in gold (difficulty row × $200) and red countdown lights for timed rounds. Progress views are quiet: a subject range plot (dot = estimate, line = likely range, dashed gold rule = overall estimate), with subtopic rows listing proficiency by clue value, and a clue-value strip. Results show a dollar total computed in the browser for display only; attempts and grading decisions stay the source of truth.
 
+Controls (buttons, cards, inputs, selects, sliders, switches, dialogs, toasts) are shadcn/ui components in `frontend/src/components/ui`, themed through the CSS variables at the top of `frontend/src/style.css`; add more with `pnpm dlx shadcn@latest add <name>` from `frontend/`. The clue board and range plots keep their hand-written styles.
+
 Fonts come from the stacks in `frontend/src/style.css` (`--font-clue`, `--font-category`): a locally installed ITC Korinna or Oswald is used when present, otherwise the system serif and condensed sans. No font files are bundled, so the app ships no licensed typeface.
 
 ## Importing clue files

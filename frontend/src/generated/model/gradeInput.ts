@@ -4,7 +4,7 @@
  * Jeopardy Study API
  * OpenAPI spec version: 1.0.0
  */
-import type { AttemptGrade } from './attemptGrade.ts';
+import type { AttemptGrade } from "./attemptGrade.ts";
 
 export interface GradeInput {
   correctness: AttemptGrade;

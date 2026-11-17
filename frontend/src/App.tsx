@@ -13,6 +13,15 @@ import {
   X,
 } from "lucide-react";
 import { CountdownLights } from "./components/CountdownLights";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
+import { PracticeSetup } from "./components/PracticeSetup";
 import { RangePlot } from "./components/RangePlot";
 import { api } from "./lib/api-client";
 import { useRealtimeSync } from "./hooks/useRealtimeSync";
@@ -25,7 +34,6 @@ import {
   type RecallRating as RecallRatingValue,
 } from "./generated/model/recallRating";
 import { SessionMode, type SessionMode as SessionModeValue } from "./generated/model/sessionMode";
-import { TimerDuration } from "./generated/model/timerDuration";
 
 type Mode = SessionModeValue;
 type ManualGrade =
@@ -352,8 +360,22 @@ export default function App() {
     }
   }
 
-  async function savePreset() {
-    if (!presetName.trim()) return;
+  function resetPool() {
+    setMinDifficulty(1);
+    setMaxDifficulty(5);
+    setDifficultyWeights([10, 25, 35, 25, 5]);
+    setWeightsCustomized(false);
+    setIncludeDouble(true);
+    setIncludeDailyDoubles(false);
+    setIncludeFinal(false);
+    setMinDate("");
+    setMaxDate("");
+    setSubjectIds([]);
+    setSubtopicIds([]);
+  }
+
+  async function savePreset(): Promise<boolean> {
+    if (!presetName.trim()) return false;
     setBusy(true);
     setError("");
     try {
@@ -363,8 +385,10 @@ export default function App() {
       });
       setPresetName("");
       await queryClient.invalidateQueries({ queryKey: ["presets"] });
+      return true;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not save preset.");
+      return false;
     } finally {
       setBusy(false);
     }
@@ -566,29 +590,38 @@ export default function App() {
         </div>
         <nav aria-label="Primary">
           {nav.map((item) => (
-            <button
+            <Button
               key={item.id}
-              className={`nav-item ${screen === item.id ? "active" : ""}`}
+              variant="ghost"
+              size="sm"
+              className={cn(
+                "nav-item rounded-full text-xs font-bold tracking-widest text-muted-foreground uppercase",
+                "max-[760px]:h-auto max-[760px]:rounded-none max-[760px]:border-t-2 max-[760px]:border-transparent max-[760px]:px-0.5 max-[760px]:pt-3.5 max-[760px]:pb-4 max-[760px]:text-[10px] max-[760px]:tracking-wide",
+                screen === item.id &&
+                  "bg-accent text-primary max-[760px]:border-primary max-[760px]:bg-transparent",
+              )}
               aria-current={screen === item.id ? "page" : undefined}
               onClick={() => setScreen(item.id)}
             >
               {item.label}
-            </button>
+            </Button>
           ))}
         </nav>
       </header>
       <main className="main-area">
         <h1 className="screen-title">{titles[screen]}</h1>
         {error && (
-          <div className="error-banner">
-            <X size={16} />
-            {error}
-            <button onClick={() => setError("")}>Dismiss</button>
-          </div>
+          <Alert variant="destructive" className="mb-4 flex items-center gap-2">
+            <X />
+            <AlertDescription className="text-foreground">{error}</AlertDescription>
+            <Button variant="ghost" size="sm" className="ml-auto" onClick={() => setError("")}>
+              Dismiss
+            </Button>
+          </Alert>
         )}
         {screen === "dashboard" && (
           <div className="overview">
-            <section className="overview-head">
+            <Card className="overview-head gap-4 p-5">
               <div>
                 <span className="eyebrow">First-try proficiency · est.</span>
                 <div className="big-number">
@@ -656,7 +689,7 @@ export default function App() {
                   </dd>
                 </div>
               </dl>
-            </section>
+            </Card>
             <div className="overview-cols">
               <section>
                 <h2 className="section-title">
@@ -694,26 +727,27 @@ export default function App() {
                     Recommendations appear when there is enough scored history.
                   </p>
                 )}
-                <button className="button-primary" onClick={() => setScreen("setup")}>
-                  Play a round <ArrowRight size={16} />
-                </button>
+                <Button size="lg" onClick={() => setScreen("setup")}>
+                  Play a round <ArrowRight />
+                </Button>
                 <h2 className="section-title">Pick a mode</h2>
                 {modes.map((item) => (
-                  <button
-                    className="mode-row"
+                  <Button
+                    variant="outline"
+                    className="mode-row mb-2 h-auto w-full justify-start gap-3 bg-muted px-3.5 py-3 text-left font-normal whitespace-normal"
                     key={item.id}
                     onClick={() => {
                       setMode(item.id);
                       setScreen("setup");
                     }}
                   >
-                    <item.icon size={17} />
-                    <span>
-                      <strong>{item.title}</strong>
-                      <small>{item.sub}</small>
+                    <item.icon className="size-[17px] text-primary" />
+                    <span className="flex flex-1 flex-col">
+                      <strong className="text-sm">{item.title}</strong>
+                      <small className="text-xs text-muted-foreground">{item.sub}</small>
                     </span>
-                    <ArrowRight size={15} />
-                  </button>
+                    <ArrowRight className="size-[15px] text-muted-foreground" />
+                  </Button>
                 ))}
                 {dashboard.data?.mode_performance.length ? (
                   <div className="mode-summary">
@@ -730,268 +764,64 @@ export default function App() {
           </div>
         )}
         {screen === "setup" && (
-          <div className="setup-wrap">
-            <p className="setup-intro">
-              Pick a mode, then tune the round to fit your time and focus.
-            </p>
-            <div className="mode-grid">
-              {modes.map((item) => (
-                <button
-                  key={item.id}
-                  className={`mode-card ${mode === item.id ? "selected" : ""}`}
-                  onClick={() => setMode(item.id)}
-                >
-                  <item.icon size={20} />
-                  <strong>{item.title}</strong>
-                  <small>{item.sub}</small>
-                  {mode === item.id && <Check className="selected-check" size={15} />}
-                </button>
-              ))}
-            </div>
-            <div className="preset-controls">
-              <label>
-                Load a saved setup
-                <select
-                  value=""
-                  onChange={(event) => {
-                    const preset = presets.data?.find(
-                      (item) => item.id === Number(event.target.value),
-                    );
-                    if (preset) applyPreset(preset);
-                  }}
-                >
-                  <option value="">Choose a preset…</option>
-                  {presets.data?.map((preset) => (
-                    <option key={preset.id} value={preset.id}>
-                      {preset.name}
-                      {preset.is_default ? " · default" : ""}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                Save this setup
-                <input
-                  value={presetName}
-                  onChange={(event) => setPresetName(event.target.value)}
-                  placeholder="Name this setup"
-                  maxLength={100}
-                />
-              </label>
-              <button
-                className="button-secondary"
-                disabled={busy || !presetName.trim()}
-                onClick={() => void savePreset()}
-              >
-                Save preset
-              </button>
-            </div>
-            <div className="setup-controls">
-              {mode !== SessionMode.anytime && (
-                <label>
-                  Questions
-                  <select value={count} onChange={(e) => setCount(Number(e.target.value))}>
-                    <option value={10}>10 clues · quick warm-up</option>
-                    <option value={20}>20 clues · focused round</option>
-                    <option value={30}>30 clues · deep practice</option>
-                    <option value={50}>50 clues · full session</option>
-                  </select>
-                </label>
-              )}
-              {mode !== SessionMode.anytime && (
-                <label>
-                  Per-clue timer
-                  <select
-                    value={timerSeconds}
-                    onChange={(e) => setTimerSeconds(Number(e.target.value))}
-                  >
-                    <option value={0}>No timer</option>
-                    {[
-                      TimerDuration.NUMBER_15,
-                      TimerDuration.NUMBER_30,
-                      TimerDuration.NUMBER_60,
-                    ].map((seconds) => (
-                      <option key={seconds} value={seconds}>
-                        {seconds} seconds
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              )}
-              <div className="setup-info">
-                <span className="eyebrow">About the data</span>
-                <p>
-                  Clue classification is optional. You can import and study source clues without
-                  assigning subjects; subject filters and breakdowns fill in as classifications are
-                  added.
-                </p>
-              </div>
-            </div>
-            <section className="filter-panel">
-              <span className="eyebrow">Tune this round</span>
-              <div className="filter-row">
-                <label>
-                  Difficulty from
-                  <select
-                    value={minDifficulty}
-                    onChange={(e) => setMinDifficulty(Number(e.target.value))}
-                  >
-                    {[1, 2, 3, 4, 5].map((level) => (
-                      <option key={level} value={level}>
-                        Row {level}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label>
-                  through
-                  <select
-                    value={maxDifficulty}
-                    onChange={(e) => setMaxDifficulty(Number(e.target.value))}
-                  >
-                    {[1, 2, 3, 4, 5].map((level) => (
-                      <option key={level} value={level}>
-                        Row {level}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label>
-                  From date
-                  <input type="date" value={minDate} onChange={(e) => setMinDate(e.target.value)} />
-                </label>
-                <label>
-                  Through date
-                  <input type="date" value={maxDate} onChange={(e) => setMaxDate(e.target.value)} />
-                </label>
-              </div>
-              <div className="difficulty-weights">
-                <div>
-                  <strong>Difficulty mix</strong>
-                  <small>Weights are normalized automatically; use 0 to exclude a row.</small>
-                </div>
-                {difficultyWeights.map((weight, index) => (
-                  <label key={index}>
-                    Row {index + 1}
-                    <span>
-                      <input
-                        type="number"
-                        min={0}
-                        max={100}
-                        value={weight}
-                        onChange={(event) => {
-                          const next = [...difficultyWeights];
-                          next[index] = Math.max(0, Math.min(100, Number(event.target.value) || 0));
-                          setDifficultyWeights(next);
-                          setWeightsCustomized(true);
-                        }}
-                      />
-                      %
-                    </span>
-                  </label>
-                ))}
-                {mode === SessionMode.anytime && !weightsCustomized && (
-                  <p className="fine-print">
-                    The starting mix is an approximation for practice, not a published official test
-                    distribution.
-                  </p>
-                )}
-              </div>
-              <div className="toggle-row">
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={includeDouble}
-                    onChange={(e) => setIncludeDouble(e.target.checked)}
-                  />{" "}
-                  Include Double Jeopardy!
-                </label>
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={includeDailyDoubles}
-                    onChange={(e) => setIncludeDailyDoubles(e.target.checked)}
-                  />{" "}
-                  Include Daily Doubles
-                </label>
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={includeFinal}
-                    onChange={(e) => setIncludeFinal(e.target.checked)}
-                  />{" "}
-                  Include Final Jeopardy!
-                </label>
-              </div>
-              {taxonomy.data?.length ? (
-                <details className="taxonomy-filter">
-                  <summary>
-                    Filter by subject or subtopic <span>(optional)</span>
-                  </summary>
-                  <div className="taxonomy-options">
-                    {taxonomy.data.map((subject) => (
-                      <details key={subject.id}>
-                        <summary>
-                          <label>
-                            <input
-                              type="checkbox"
-                              checked={subjectIds.includes(subject.id)}
-                              onChange={(e) =>
-                                setSubjectIds(
-                                  e.target.checked
-                                    ? [...subjectIds, subject.id]
-                                    : subjectIds.filter((id) => id !== subject.id),
-                                )
-                              }
-                            />{" "}
-                            {subject.name}
-                          </label>
-                        </summary>
-                        <div>
-                          {subject.subtopics.map((topic) => (
-                            <label key={topic.id}>
-                              <input
-                                type="checkbox"
-                                checked={subtopicIds.includes(topic.id)}
-                                onChange={(e) =>
-                                  setSubtopicIds(
-                                    e.target.checked
-                                      ? [...subtopicIds, topic.id]
-                                      : subtopicIds.filter((id) => id !== topic.id),
-                                  )
-                                }
-                              />{" "}
-                              {topic.name}
-                            </label>
-                          ))}
-                        </div>
-                      </details>
-                    ))}
-                  </div>
-                </details>
-              ) : (
-                <p className="filter-hint">
-                  Subject and subtopic filters are available after loading the optional taxonomy.
-                </p>
-              )}
-            </section>
-            <button className="button-primary" disabled={busy} onClick={start}>
-              {busy ? "Preparing your round…" : "Begin practice"}
-              <ArrowRight size={17} />
-            </button>
-          </div>
+          <PracticeSetup
+            mode={mode}
+            setMode={setMode}
+            count={count}
+            setCount={setCount}
+            timerSeconds={timerSeconds}
+            setTimerSeconds={setTimerSeconds}
+            minDifficulty={minDifficulty}
+            setMinDifficulty={setMinDifficulty}
+            maxDifficulty={maxDifficulty}
+            setMaxDifficulty={setMaxDifficulty}
+            minDate={minDate}
+            setMinDate={setMinDate}
+            maxDate={maxDate}
+            setMaxDate={setMaxDate}
+            weights={difficultyWeights}
+            setWeight={(index, value) => {
+              setDifficultyWeights(difficultyWeights.map((w, i) => (i === index ? value : w)));
+              setWeightsCustomized(true);
+            }}
+            weightsCustomized={weightsCustomized}
+            includeDouble={includeDouble}
+            setIncludeDouble={setIncludeDouble}
+            includeDailyDoubles={includeDailyDoubles}
+            setIncludeDailyDoubles={setIncludeDailyDoubles}
+            includeFinal={includeFinal}
+            setIncludeFinal={setIncludeFinal}
+            taxonomy={taxonomy.data}
+            subjectIds={subjectIds}
+            setSubjectIds={setSubjectIds}
+            subtopicIds={subtopicIds}
+            setSubtopicIds={setSubtopicIds}
+            presets={presets.data}
+            onLoadPreset={(id) => {
+              const preset = presets.data?.find((item) => item.id === id);
+              if (preset) applyPreset(preset);
+            }}
+            presetName={presetName}
+            setPresetName={setPresetName}
+            onSavePreset={savePreset}
+            onReset={resetPool}
+            busy={busy}
+            onStart={start}
+          />
         )}
         {screen === "practice" && session && current && (
           <section className="practice-wrap">
             <div className="practice-top">
-              <button className="back-link" onClick={() => void endRound()} disabled={busy}>
-                <ChevronLeft size={17} /> End round
-              </button>
+              <Button variant="ghost" size="sm" onClick={() => void endRound()} disabled={busy}>
+                <ChevronLeft /> End round
+              </Button>
               <span className="round-mode">{session.mode.replace("_", " ")}</span>
             </div>
-            <div className="question-progress">
-              <div style={{ width: `${(session.current_index / session.total) * 100}%` }} />
-            </div>
+            <Progress
+              className="mb-3.5 h-1.5"
+              value={(session.current_index / session.total) * 100}
+              aria-label="Round progress"
+            />
             <article className="question-card">
               <div className="question-meta">
                 <span className="category-label">{current.category}</span>
@@ -1017,9 +847,9 @@ export default function App() {
                   }}
                 >
                   <div className="answer-field">
-                    <input
+                    <Input
                       ref={input}
-                      className="answer-input test-input"
+                      className="answer-input test-input h-auto rounded-none border-0 bg-transparent px-0 shadow-none focus-visible:ring-0 dark:bg-transparent"
                       value={entry}
                       onChange={(e) => setEntry(e.target.value)}
                       placeholder="What is…"
@@ -1028,22 +858,22 @@ export default function App() {
                     />
                     <kbd>ENTER</kbd>
                   </div>
-                  <button
-                    className="button-primary"
+                  <Button
+                    size="lg"
                     disabled={busy}
                     // Keep focus in the input so the mobile keyboard stays open for the next clue.
                     onMouseDown={(e) => e.preventDefault()}
                   >
                     {busy ? "Saving…" : "Lock in response"}
-                    <ArrowRight size={17} />
-                  </button>
+                    <ArrowRight />
+                  </Button>
                 </form>
               ) : !reveal ? (
                 <div className="answer-reveal">
-                  <button className="button-primary" onClick={revealAnswer} disabled={busy}>
+                  <Button size="lg" onClick={revealAnswer} disabled={busy}>
                     {busy ? "Turning the card…" : "Reveal response"}
-                    <ArrowRight size={17} />
-                  </button>
+                    <ArrowRight />
+                  </Button>
                   <p>
                     Try to recall it first. <kbd>ENTER</kbd> to reveal.
                   </p>
@@ -1053,18 +883,33 @@ export default function App() {
                   <span className="eyebrow">Correct response</span>
                   <strong>{current.correct_response}</strong>
                   <div className="grade-buttons">
-                    <button onClick={() => rateRecall(RecallRating.confident)} disabled={busy}>
+                    <Button
+                      variant="outline"
+                      className="h-auto"
+                      onClick={() => rateRecall(RecallRating.confident)}
+                      disabled={busy}
+                    >
                       <b>1</b>
                       Knew it
-                    </button>
-                    <button onClick={() => rateRecall(RecallRating.guessed)} disabled={busy}>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="h-auto"
+                      onClick={() => rateRecall(RecallRating.guessed)}
+                      disabled={busy}
+                    >
                       <b>2</b>
                       Hunch
-                    </button>
-                    <button onClick={() => rateRecall(RecallRating.did_not_know)} disabled={busy}>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="h-auto"
+                      onClick={() => rateRecall(RecallRating.did_not_know)}
+                      disabled={busy}
+                    >
                       <b>3</b>
                       Didn't know
-                    </button>
+                    </Button>
                   </div>
                   <small className="rating-hint">Your rating saves this clue and moves on.</small>
                 </div>
@@ -1072,13 +917,15 @@ export default function App() {
               <div className="question-footer">
                 <span>{current.subject ?? "Subject not yet assigned"}</span>
                 {session.mode !== SessionMode.anytime && !reveal && (
-                  <button
-                    className="text-button skip-button"
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="skip-button text-xs tracking-wide uppercase"
                     onClick={() => void next()}
                     disabled={busy}
                   >
-                    Skip this clue <ArrowRight size={14} />
-                  </button>
+                    Skip this clue <ArrowRight />
+                  </Button>
                 )}
               </div>
             </article>
@@ -1086,7 +933,7 @@ export default function App() {
         )}
         {screen === "results" && result && (
           <section className="results-wrap">
-            <div className="score-card">
+            <Card className="score-card p-6">
               <span className="eyebrow">
                 Round complete · {result.score} of {result.total}
               </span>
@@ -1101,16 +948,16 @@ export default function App() {
                   <i key={item.position} className={item.correctness} />
                 ))}
               </div>
-              <button
-                className="button-primary"
+              <Button
+                size="lg"
                 onClick={() => {
                   setSession(null);
                   setScreen("setup");
                 }}
               >
-                Practice again <ArrowRight size={17} />
-              </button>
-            </div>
+                Practice again <ArrowRight />
+              </Button>
+            </Card>
             <div className="review-panel">
               <h2 className="section-title">Clue by clue</h2>
               {result.attempts.map((item) => (
@@ -1133,24 +980,45 @@ export default function App() {
                   <b className="review-dollars">{formatDollars(clueDollars(item), true)}</b>
                   {item.correctness !== AttemptGrade.unanswered && (
                     <div className="review-grade">
-                      <button
-                        onClick={() => override(item.position, AttemptGrade.correct)}
-                        title="Mark correct"
-                      >
-                        <Check size={15} />
-                      </button>
-                      <button
-                        onClick={() => override(item.position, AttemptGrade.partial)}
-                        title="Mark partially correct"
-                      >
-                        <span>½</span>
-                      </button>
-                      <button
-                        onClick={() => override(item.position, AttemptGrade.incorrect)}
-                        title="Mark incorrect"
-                      >
-                        <X size={15} />
-                      </button>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            aria-label="Mark correct"
+                            onClick={() => override(item.position, AttemptGrade.correct)}
+                          >
+                            <Check />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Mark correct</TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            aria-label="Mark partially correct"
+                            onClick={() => override(item.position, AttemptGrade.partial)}
+                          >
+                            <span>½</span>
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Mark partially correct</TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            aria-label="Mark incorrect"
+                            onClick={() => override(item.position, AttemptGrade.incorrect)}
+                          >
+                            <X />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Mark incorrect</TooltipContent>
+                      </Tooltip>
                     </div>
                   )}
                 </div>
@@ -1179,8 +1047,9 @@ export default function App() {
           <section className="full-panel">
             {history.data?.length ? (
               history.data.map((item) => (
-                <button
-                  className="history-row"
+                <Button
+                  variant="outline"
+                  className="history-row mb-2 h-auto w-full justify-start gap-3 bg-muted px-4 py-3 text-left font-normal whitespace-normal"
                   key={item.id}
                   onClick={async () => {
                     try {
@@ -1209,16 +1078,20 @@ export default function App() {
                     }
                   }}
                 >
-                  <BookOpen size={17} />
-                  <span>
-                    <strong>{item.mode.replace("_", " ")}</strong>
-                    <small>{new Date(item.started_at).toLocaleString()}</small>
+                  <BookOpen className="size-[17px] text-primary" />
+                  <span className="flex flex-1 flex-col">
+                    <strong className="text-sm capitalize">{item.mode.replace("_", " ")}</strong>
+                    <small className="text-xs text-muted-foreground">
+                      {new Date(item.started_at).toLocaleString()}
+                    </small>
                   </span>
-                  <span className="history-count">
-                    {item.answered} / {item.count} answered
-                  </span>
-                  <ArrowRight size={16} />
-                </button>
+                  <Badge variant={item.status === "active" ? "default" : "outline"}>
+                    {item.status === "active"
+                      ? "In progress"
+                      : `${item.answered} / ${item.count} answered`}
+                  </Badge>
+                  <ArrowRight className="size-4 text-muted-foreground" />
+                </Button>
               ))
             ) : (
               <Empty text="Your completed rounds will appear here." />
@@ -1227,7 +1100,7 @@ export default function App() {
         )}
         {screen === "settings" && (
           <section className="settings-grid">
-            <div className="settings-card">
+            <Card className="settings-card">
               <Layers3 size={19} />
               <span className="eyebrow">Optional knowledge map</span>
               <h3>Subject classification</h3>
@@ -1238,18 +1111,16 @@ export default function App() {
               </p>
               <code>uv run python backend/manage.py seed_taxonomy</code>
               <code>uv run python backend/manage.py classify_clues --limit 100</code>
-              <button
-                className="button-primary classify-button"
-                disabled={busy}
-                onClick={startClassification}
-              >
-                Start optional classification <ArrowRight size={16} />
-              </button>
+              <Button className="classify-button" disabled={busy} onClick={startClassification}>
+                Start optional classification <ArrowRight />
+              </Button>
               {jobs.data?.map((job) => (
                 <div className="job-row" key={job.id}>
                   <span className={`job-dot ${job.status}`} />
                   <span>
-                    <strong>{job.status}</strong>
+                    <Badge variant="outline" className="mb-1">
+                      {job.status}
+                    </Badge>
                     <small>
                       {job.processed + job.failed} / {job.total} processed · {job.processed}{" "}
                       classified · {job.failed} failed
@@ -1257,8 +1128,8 @@ export default function App() {
                   </span>
                 </div>
               ))}
-            </div>
-            <div className="settings-card">
+            </Card>
+            <Card className="settings-card">
               <BookOpen size={19} />
               <span className="eyebrow">Your clue library</span>
               <h3>Import clues</h3>
@@ -1273,7 +1144,7 @@ export default function App() {
                 Only import material you are authorized to use. Keep source files outside version
                 control.
               </p>
-            </div>
+            </Card>
           </section>
         )}
       </main>
@@ -1302,8 +1173,8 @@ function formatDollars(amount: number, signed = false) {
 
 function Empty({ text }: { text: string }) {
   return (
-    <div className="empty-state">
+    <Card className="empty-state bg-muted p-6 text-center">
       <p>{text}</p>
-    </div>
+    </Card>
   );
 }

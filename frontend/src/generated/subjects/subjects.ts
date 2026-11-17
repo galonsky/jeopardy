@@ -4,9 +4,7 @@
  * Jeopardy Study API
  * OpenAPI spec version: 1.0.0
  */
-import {
-  useQuery
-} from '@tanstack/react-query';
+import { useQuery } from "@tanstack/react-query";
 import type {
   DataTag,
   DefinedInitialDataOptions,
@@ -16,22 +14,19 @@ import type {
   QueryKey,
   UndefinedInitialDataOptions,
   UseQueryOptions,
-  UseQueryResult
-} from '@tanstack/react-query';
+  UseQueryResult,
+} from "@tanstack/react-query";
 
-import { customInstance } from '../../lib/api-client.ts';
-
+import { customInstance } from "../../lib/api-client.ts";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
-
-
 
 const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKey: K } => {
   const result = { queryKey } as T & { queryKey: K };
   for (const key of Object.keys(query)) {
     // The explicit queryKey always wins, matching the previous
     // `{ ...query, queryKey }` spread where it was set last.
-    if (key === 'queryKey') continue;
+    if (key === "queryKey") continue;
     Object.defineProperty(result, key, {
       enumerable: true,
       configurable: true,
@@ -42,114 +37,113 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
 };
 
 export type getTaxonomyResponse200 = {
-  data: void
-  status: 200
-}
+  data: void;
+  status: 200;
+};
 
-export type getTaxonomyResponseSuccess = (getTaxonomyResponse200) & {
+export type getTaxonomyResponseSuccess = getTaxonomyResponse200 & {
   headers: Headers;
 };
-;
 
-export type getTaxonomyResponse = (getTaxonomyResponseSuccess)
+export type getTaxonomyResponse = getTaxonomyResponseSuccess;
 
 export const getGetTaxonomyUrl = () => {
-
-
-
-
-  return `/api/taxonomy`
-}
+  return `/api/taxonomy`;
+};
 
 /**
  * @summary Taxonomy
  */
-export const getTaxonomy = async ( options?: Parameters<typeof customInstance>[1]): Promise<getTaxonomyResponse> => {
-
-  return customInstance<getTaxonomyResponse>(getGetTaxonomyUrl(),
-  {
+export const getTaxonomy = async (
+  options?: Parameters<typeof customInstance>[1],
+): Promise<getTaxonomyResponse> => {
+  return customInstance<getTaxonomyResponse>(getGetTaxonomyUrl(), {
     ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
+    method: "GET",
+  });
+};
 
 export const getGetTaxonomyQueryKey = () => {
-    return [
-    `/api/taxonomy`
-    ] as const;
-    }
+  return [`/api/taxonomy`] as const;
+};
 
+export const getGetTaxonomyQueryOptions = <
+  TData = Awaited<ReturnType<typeof getTaxonomy>>,
+  TError = unknown,
+>(options?: {
+  query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getTaxonomy>>, TError, TData>>;
+  request?: SecondParameter<typeof customInstance>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
-export const getGetTaxonomyQueryOptions = <TData = Awaited<ReturnType<typeof getTaxonomy>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTaxonomy>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
-) => {
+  const queryKey = queryOptions?.queryKey ?? getGetTaxonomyQueryKey();
 
-const {query: queryOptions, request: requestOptions} = options ?? {};
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getTaxonomy>>> = ({ signal }) =>
+    getTaxonomy({ signal, ...requestOptions });
 
-  const queryKey =  queryOptions?.queryKey ?? getGetTaxonomyQueryKey();
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getTaxonomy>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
 
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTaxonomy>>> = ({ signal }) => getTaxonomy({ signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTaxonomy>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetTaxonomyQueryResult = NonNullable<Awaited<ReturnType<typeof getTaxonomy>>>
-export type GetTaxonomyQueryError = unknown
-
+export type GetTaxonomyQueryResult = NonNullable<Awaited<ReturnType<typeof getTaxonomy>>>;
+export type GetTaxonomyQueryError = unknown;
 
 /** @summary Taxonomy */
 export function useGetTaxonomy<TData = Awaited<ReturnType<typeof getTaxonomy>>, TError = unknown>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTaxonomy>>, TError, TData>> & Pick<
+  options: {
+    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getTaxonomy>>, TError, TData>> &
+      Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getTaxonomy>>,
           TError,
           Awaited<ReturnType<typeof getTaxonomy>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /** @summary Taxonomy */
 export function useGetTaxonomy<TData = Awaited<ReturnType<typeof getTaxonomy>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTaxonomy>>, TError, TData>> & Pick<
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getTaxonomy>>, TError, TData>> &
+      Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getTaxonomy>>,
           TError,
           Awaited<ReturnType<typeof getTaxonomy>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /** @summary Taxonomy */
 export function useGetTaxonomy<TData = Awaited<ReturnType<typeof getTaxonomy>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTaxonomy>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getTaxonomy>>, TError, TData>>;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /** @summary Taxonomy */
 export function useGetTaxonomy<TData = Awaited<ReturnType<typeof getTaxonomy>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTaxonomy>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getTaxonomy>>, TError, TData>>;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getGetTaxonomyQueryOptions(options);
 
-  const queryOptions = getGetTaxonomyQueryOptions(options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
 
   return withQueryKey(query, queryOptions.queryKey);
 }
-
-
-
-
-
-

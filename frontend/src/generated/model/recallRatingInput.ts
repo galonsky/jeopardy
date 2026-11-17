@@ -4,7 +4,7 @@
  * Jeopardy Study API
  * OpenAPI spec version: 1.0.0
  */
-import type { RecallRating } from './recallRating.ts';
+import type { RecallRating } from "./recallRating.ts";
 
 export interface RecallRatingInput {
   rating: RecallRating;

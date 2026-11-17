@@ -5,8 +5,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type TimerDuration = typeof TimerDuration[keyof typeof TimerDuration];
-
+export type TimerDuration = (typeof TimerDuration)[keyof typeof TimerDuration];
 
 export const TimerDuration = {
   NUMBER_15: 15,

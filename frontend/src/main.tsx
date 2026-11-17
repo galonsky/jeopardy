@@ -2,6 +2,8 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import App from "./App";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "@/components/ui/sonner";
 import "./style.css";
 import "./filters.css";
 
@@ -10,7 +12,10 @@ const client = new QueryClient({ defaultOptions: { queries: { staleTime: 30_000,
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <QueryClientProvider client={client}>
-      <App />
+      <TooltipProvider>
+        <App />
+      </TooltipProvider>
+      <Toaster />
     </QueryClientProvider>
   </React.StrictMode>,
 );

@@ -4,14 +4,14 @@
  * Jeopardy Study API
  * OpenAPI spec version: 1.0.0
  */
-import type { PracticePresetInputConfig } from './practicePresetInputConfig.ts';
-import type { SessionMode } from './sessionMode.ts';
+import type { PracticePresetInputConfig } from "./practicePresetInputConfig.ts";
+import type { SessionMode } from "./sessionMode.ts";
 
 export interface PracticePresetInput {
   /**
-     * @minLength 1
-     * @maxLength 100
-     */
+   * @minLength 1
+   * @maxLength 100
+   */
   name: string;
   mode?: SessionMode;
   config?: PracticePresetInputConfig;

@@ -4,9 +4,7 @@
  * Jeopardy Study API
  * OpenAPI spec version: 1.0.0
  */
-import {
-  useQuery
-} from '@tanstack/react-query';
+import { useQuery } from "@tanstack/react-query";
 import type {
   DataTag,
   DefinedInitialDataOptions,
@@ -16,22 +14,19 @@ import type {
   QueryKey,
   UndefinedInitialDataOptions,
   UseQueryOptions,
-  UseQueryResult
-} from '@tanstack/react-query';
+  UseQueryResult,
+} from "@tanstack/react-query";
 
-import { customInstance } from '../../lib/api-client.ts';
-
+import { customInstance } from "../../lib/api-client.ts";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
-
-
 
 const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKey: K } => {
   const result = { queryKey } as T & { queryKey: K };
   for (const key of Object.keys(query)) {
     // The explicit queryKey always wins, matching the previous
     // `{ ...query, queryKey }` spread where it was set last.
-    if (key === 'queryKey') continue;
+    if (key === "queryKey") continue;
     Object.defineProperty(result, key, {
       enumerable: true,
       configurable: true,
@@ -42,226 +37,250 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
 };
 
 export type getHistoryResponse200 = {
-  data: void
-  status: 200
-}
+  data: void;
+  status: 200;
+};
 
-export type getHistoryResponseSuccess = (getHistoryResponse200) & {
+export type getHistoryResponseSuccess = getHistoryResponse200 & {
   headers: Headers;
 };
-;
 
-export type getHistoryResponse = (getHistoryResponseSuccess)
+export type getHistoryResponse = getHistoryResponseSuccess;
 
 export const getGetHistoryUrl = () => {
-
-
-
-
-  return `/api/history`
-}
+  return `/api/history`;
+};
 
 /**
  * @summary History
  */
-export const getHistory = async ( options?: Parameters<typeof customInstance>[1]): Promise<getHistoryResponse> => {
-
-  return customInstance<getHistoryResponse>(getGetHistoryUrl(),
-  {
+export const getHistory = async (
+  options?: Parameters<typeof customInstance>[1],
+): Promise<getHistoryResponse> => {
+  return customInstance<getHistoryResponse>(getGetHistoryUrl(), {
     ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
+    method: "GET",
+  });
+};
 
 export const getGetHistoryQueryKey = () => {
-    return [
-    `/api/history`
-    ] as const;
-    }
+  return [`/api/history`] as const;
+};
 
+export const getGetHistoryQueryOptions = <
+  TData = Awaited<ReturnType<typeof getHistory>>,
+  TError = unknown,
+>(options?: {
+  query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getHistory>>, TError, TData>>;
+  request?: SecondParameter<typeof customInstance>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
-export const getGetHistoryQueryOptions = <TData = Awaited<ReturnType<typeof getHistory>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHistory>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
-) => {
+  const queryKey = queryOptions?.queryKey ?? getGetHistoryQueryKey();
 
-const {query: queryOptions, request: requestOptions} = options ?? {};
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getHistory>>> = ({ signal }) =>
+    getHistory({ signal, ...requestOptions });
 
-  const queryKey =  queryOptions?.queryKey ?? getGetHistoryQueryKey();
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getHistory>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
 
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getHistory>>> = ({ signal }) => getHistory({ signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getHistory>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetHistoryQueryResult = NonNullable<Awaited<ReturnType<typeof getHistory>>>
-export type GetHistoryQueryError = unknown
-
+export type GetHistoryQueryResult = NonNullable<Awaited<ReturnType<typeof getHistory>>>;
+export type GetHistoryQueryError = unknown;
 
 /** @summary History */
 export function useGetHistory<TData = Awaited<ReturnType<typeof getHistory>>, TError = unknown>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHistory>>, TError, TData>> & Pick<
+  options: {
+    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getHistory>>, TError, TData>> &
+      Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getHistory>>,
           TError,
           Awaited<ReturnType<typeof getHistory>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /** @summary History */
 export function useGetHistory<TData = Awaited<ReturnType<typeof getHistory>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHistory>>, TError, TData>> & Pick<
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getHistory>>, TError, TData>> &
+      Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getHistory>>,
           TError,
           Awaited<ReturnType<typeof getHistory>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /** @summary History */
 export function useGetHistory<TData = Awaited<ReturnType<typeof getHistory>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHistory>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getHistory>>, TError, TData>>;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /** @summary History */
 export function useGetHistory<TData = Awaited<ReturnType<typeof getHistory>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHistory>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getHistory>>, TError, TData>>;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getGetHistoryQueryOptions(options);
 
-  const queryOptions = getGetHistoryQueryOptions(options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
 
   return withQueryKey(query, queryOptions.queryKey);
 }
 
-
-
-
-
-
 export type getSessionResultsResponse200 = {
-  data: void
-  status: 200
-}
+  data: void;
+  status: 200;
+};
 
-export type getSessionResultsResponseSuccess = (getSessionResultsResponse200) & {
+export type getSessionResultsResponseSuccess = getSessionResultsResponse200 & {
   headers: Headers;
 };
-;
 
-export type getSessionResultsResponse = (getSessionResultsResponseSuccess)
+export type getSessionResultsResponse = getSessionResultsResponseSuccess;
 
-export const getGetSessionResultsUrl = (sessionId: string,) => {
-
-
-
-
-  return `/api/sessions/${sessionId}/results`
-}
+export const getGetSessionResultsUrl = (sessionId: string) => {
+  return `/api/sessions/${sessionId}/results`;
+};
 
 /**
  * @summary Results
  */
-export const getSessionResults = async (sessionId: string, options?: Parameters<typeof customInstance>[1]): Promise<getSessionResultsResponse> => {
-
-  return customInstance<getSessionResultsResponse>(getGetSessionResultsUrl(sessionId),
-  {
+export const getSessionResults = async (
+  sessionId: string,
+  options?: Parameters<typeof customInstance>[1],
+): Promise<getSessionResultsResponse> => {
+  return customInstance<getSessionResultsResponse>(getGetSessionResultsUrl(sessionId), {
     ...options,
-    method: 'GET'
+    method: "GET",
+  });
+};
 
+export const getGetSessionResultsQueryKey = (sessionId: string) => {
+  return [`/api/sessions/${sessionId}/results`] as const;
+};
 
-  }
-);}
-
-
-
-
-
-export const getGetSessionResultsQueryKey = (sessionId: string,) => {
-    return [
-    `/api/sessions/${sessionId}/results`
-    ] as const;
-    }
-
-
-export const getGetSessionResultsQueryOptions = <TData = Awaited<ReturnType<typeof getSessionResults>>, TError = unknown>(sessionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSessionResults>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetSessionResultsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getSessionResults>>,
+  TError = unknown,
+>(
+  sessionId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getSessionResults>>, TError, TData>>;
+    request?: SecondParameter<typeof customInstance>;
+  },
 ) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
-const {query: queryOptions, request: requestOptions} = options ?? {};
+  const queryKey = queryOptions?.queryKey ?? getGetSessionResultsQueryKey(sessionId);
 
-  const queryKey =  queryOptions?.queryKey ?? getGetSessionResultsQueryKey(sessionId);
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getSessionResults>>> = ({ signal }) =>
+    getSessionResults(sessionId, { signal, ...requestOptions });
 
+  return {
+    queryKey,
+    queryFn,
+    enabled: sessionId !== null && sessionId !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<Awaited<ReturnType<typeof getSessionResults>>, TError, TData> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+};
 
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSessionResults>>> = ({ signal }) => getSessionResults(sessionId, { signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, enabled: sessionId !== null && sessionId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSessionResults>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetSessionResultsQueryResult = NonNullable<Awaited<ReturnType<typeof getSessionResults>>>
-export type GetSessionResultsQueryError = unknown
-
+export type GetSessionResultsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getSessionResults>>
+>;
+export type GetSessionResultsQueryError = unknown;
 
 /** @summary Results */
-export function useGetSessionResults<TData = Awaited<ReturnType<typeof getSessionResults>>, TError = unknown>(
- sessionId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSessionResults>>, TError, TData>> & Pick<
+export function useGetSessionResults<
+  TData = Awaited<ReturnType<typeof getSessionResults>>,
+  TError = unknown,
+>(
+  sessionId: string,
+  options: {
+    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getSessionResults>>, TError, TData>> &
+      Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getSessionResults>>,
           TError,
           Awaited<ReturnType<typeof getSessionResults>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /** @summary Results */
-export function useGetSessionResults<TData = Awaited<ReturnType<typeof getSessionResults>>, TError = unknown>(
- sessionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSessionResults>>, TError, TData>> & Pick<
+export function useGetSessionResults<
+  TData = Awaited<ReturnType<typeof getSessionResults>>,
+  TError = unknown,
+>(
+  sessionId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getSessionResults>>, TError, TData>> &
+      Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getSessionResults>>,
           TError,
           Awaited<ReturnType<typeof getSessionResults>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /** @summary Results */
-export function useGetSessionResults<TData = Awaited<ReturnType<typeof getSessionResults>>, TError = unknown>(
- sessionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSessionResults>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetSessionResults<
+  TData = Awaited<ReturnType<typeof getSessionResults>>,
+  TError = unknown,
+>(
+  sessionId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getSessionResults>>, TError, TData>>;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /** @summary Results */
-export function useGetSessionResults<TData = Awaited<ReturnType<typeof getSessionResults>>, TError = unknown>(
- sessionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSessionResults>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+export function useGetSessionResults<
+  TData = Awaited<ReturnType<typeof getSessionResults>>,
+  TError = unknown,
+>(
+  sessionId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getSessionResults>>, TError, TData>>;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getGetSessionResultsQueryOptions(sessionId, options);
 
-  const queryOptions = getGetSessionResultsQueryOptions(sessionId,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
 
   return withQueryKey(query, queryOptions.queryKey);
 }
-
-
-
-
-
-
